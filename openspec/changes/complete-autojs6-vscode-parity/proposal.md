@@ -49,3 +49,5 @@ This change exists to enforce the same rules at full-parity level:
 - 影响本地文件系统：项目遍历、ignore 过滤、zip、md5、文件 watcher、模板/片段资源。
 - 影响外部进程：ADB 执行、provider 查询、端口 forward、跨平台工具定位。
 - 影响质量体系：协议单元测试、集成测试、设备回放、runIde 验证、JetBrains IDE 全家桶兼容验证与发布检查。
+
+

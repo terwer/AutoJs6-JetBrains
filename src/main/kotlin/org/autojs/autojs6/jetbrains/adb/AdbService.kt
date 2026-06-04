@@ -53,7 +53,7 @@ class AdbService(private val project: Project) {
             return
         }
         val localPort = findAvailablePort()
-        val forward = run(adb, "-s", device.id, "forward", "tcp:$localPort", "tcp:${AutoJs6Constants.ADB_SERVER_PORT}")
+        val forward = run(adb, "-s", device.id, "forward", "tcp:$localPort", "tcp:${AutoJs6Constants.SERVER_PORT}")
         if (forward.exitCode != 0) {
             AutoJs6Notifier.error(project, "ADB forward 失败: ${forward.stderr.ifBlank { forward.stdout }}")
             return
@@ -83,3 +83,4 @@ class AdbService(private val project: Project) {
 }
 
 data class ProcResult(val exitCode: Int, val stdout: String, val stderr: String)
+

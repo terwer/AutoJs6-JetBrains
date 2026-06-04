@@ -10,7 +10,7 @@
 
 ## Non-Negotiable Compatibility Rules
 
-1. **100% historical runtime compatibility:** the parity release SHALL run existing AutoJs6 projects using existing `project.json`, template layout, ignore semantics, path/id/name/script fields, `bytes_command`, md5, deletedFiles, override, ports, and frame payload formats without requiring users to migrate old projects.
+1. **runtime/protocol compatibility plus built-in-template project scaffolding:** the parity release SHALL preserve existing AutoJs6 runtime/protocol expectations for implemented flows. New Project scaffolding SHALL create a brand-new project from the plugin-bundled AutoJs6 template, not copy or migrate an existing project.
 2. **Habit preservation with JetBrains best practice:** users coming from the VSCode extension SHALL find equivalent command names, action intent, connection choices, project context actions, keymap recommendations, and output/log concepts, while implementation follows JetBrains Action System, Tool Window, Settings, background task, notification, and Disposer lifecycle practices.
 3. **Additive feature policy:** JetBrains-native diagnostics, Tool Window, action search, safer HTTP controls, and publishing docs are additive; they must not replace, remove, or silently weaken required VSCode parity behavior.
 4. **Evidence over claims:** no mock/fake/stub behavior may satisfy a task or requirement. Each completed parity row must cite automated tests, protocol replay, runIde verification, or real AutoJs6/ADB/manual evidence. Unknowns must stay open or blocked.
@@ -74,3 +74,8 @@
 - 目标是 VSCode 扩展全量功能对齐，不新增独立自研功能范围来替代 parity。
 - 需要发布能力，但由用户自行发布；项目必须提供完整发布文档 `release-guide.md`，覆盖版本准备、构建、签名、Plugin Verifier、Marketplace 上传、私有 ZIP 分发、回滚和问题排查步骤。
 - 目标 IDE 为 JetBrains IDE 全家桶通用支持，禁止绑定某一个 IDE；如个别 IDE 确实无法兼容，必须列入例外矩阵并给出证据、原因、影响和替代方案。
+
+
+
+
+

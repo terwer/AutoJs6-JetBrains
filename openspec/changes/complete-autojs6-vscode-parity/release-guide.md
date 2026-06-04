@@ -5,7 +5,7 @@
 ## 1. 发布原则
 
 - 发布账号、Marketplace token、签名私钥、证书链都由用户自己持有和执行，项目不得内置任何发布凭据。
-- 发布前必须通过四规则审计：历史项目 100% 运行兼容、保留用户习惯、功能只增不减、无 mock/fake/推测完成。
+- 发布前必须通过四规则审计：既有运行时/协议兼容、保留用户习惯、功能只增不减、无 mock/fake/推测完成。
 - 发布前必须通过 JetBrains IDE 全家桶兼容矩阵；个别 IDE 如无法支持，必须进入例外矩阵并说明证据、原因、影响和替代方案。
 - 发布文档必须同时覆盖 Marketplace 发布和私有 ZIP 分发。
 
@@ -153,7 +153,7 @@ $env:PUBLISH_TOKEN='...'
 任一条件满足即禁止发布：
 
 - VSCode parity 矩阵存在未解释缺口。
-- compatibility ledger 中存在历史项目运行不兼容。
+- compatibility ledger 中存在既有运行时/协议不兼容。
 - 存在 mock/fake/stub 成功路径。
 - Plugin Verifier 存在阻断级兼容问题。
 - 发布包含凭据或用户本地隐私路径。
@@ -168,3 +168,4 @@ $env:PUBLISH_TOKEN='...'
 - Verifying Plugin Compatibility: https://plugins.jetbrains.com/docs/intellij/verifying-plugin-compatibility.html
 - Plugin Compatibility with IntelliJ Platform Products: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
 - Marketplace Approval Guidelines: https://plugins.jetbrains.com/docs/marketplace/jetbrains-marketplace-approval-guidelines.html
+

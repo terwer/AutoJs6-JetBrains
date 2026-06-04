@@ -1,16 +1,17 @@
 # autojs6-project-template Specification
 
-## Purpose
-TBD - created by archiving change add-autojs6-jetbrains-mvp. Update Purpose after archive.
-## Requirements
-### Requirement: Create AutoJs6 Project From Template
+## ADDED Requirements
 
-The plugin SHALL create a new AutoJs6 project by copying an internal project template into a user-selected directory.
+### Requirement: Create New AutoJs6 Project From Plugin Template
 
-#### Scenario: User selects an empty or suitable target directory
+The plugin SHALL create a brand-new AutoJs6 project from the plugin-bundled AutoJs6 template. This workflow is not an existing-project copy, migration, import, or sync operation.
 
-- **WHEN** the user invokes New AutoJs6 Project and selects a target directory
-- **THEN** the plugin copies template files into that directory without overwriting existing user files unexpectedly
+#### Scenario: User enters project name and selects parent directory
+
+- **WHEN** the user invokes New AutoJs6 Project, selects a target project directory
+- **THEN** the plugin uses the selected directory as the project root
+- **AND** the plugin copies bundled template files directly into the selected directory
+- **AND** the plugin reports the created path to the user
 
 ### Requirement: Replace Project Name Placeholder
 
@@ -19,32 +20,35 @@ The plugin SHALL replace `%PROJECT_NAME_PLACEHOLDER%` in generated template file
 #### Scenario: Template contains project name placeholder
 
 - **WHEN** the project is generated
-- **THEN** all `%PROJECT_NAME_PLACEHOLDER%` occurrences are replaced with the project name
+- **THEN** all `%PROJECT_NAME_PLACEHOLDER%` occurrences are replaced with the new project name
 
 ### Requirement: Replace Package Suffix Placeholder
 
-The plugin SHALL replace `%PACKAGE_SUFFIX_PLACEHOLDER%` using the same normalization intent as the VSCode extension.
+The plugin SHALL replace `%PACKAGE_SUFFIX_PLACEHOLDER%` with a lower-case ASCII package-safe suffix derived from the new project name.
 
 #### Scenario: Project name contains non-package characters
 
-- **WHEN** the project is generated from a name containing spaces, punctuation, leading digits, or Chinese characters
-- **THEN** the package suffix is normalized to a lower-case package-safe value compatible with AutoJs6 expectations
+- **WHEN** the project name contains spaces, punctuation, leading digits, or non-ASCII characters
+- **THEN** the package suffix is normalized to a lower-case package-safe value
+- **AND** a leading digit is prefixed with `app_`
 
 ### Requirement: Avoid Accidental Overwrite
 
-The plugin SHALL avoid overwriting existing files in the target directory unless the user explicitly confirms overwriting.
+The plugin SHALL avoid overwriting existing files in the generated target directory unless overwrite behavior is explicitly requested by implementation or future UX.
 
 #### Scenario: Target file already exists
 
 - **WHEN** a template file would overwrite an existing file
-- **THEN** the plugin skips the file or asks for explicit confirmation before overwriting
+- **THEN** the plugin skips the existing file by default
 
-### Requirement: Preserve Historical Template Runtime Compatibility
+### Requirement: No existing project Dependency
 
-The plugin SHALL generate AutoJs6 projects whose layout, placeholder replacement, package suffix normalization intent, and runtime expectations remain compatible with existing AutoJs6 projects created by the VSCode extension.
+The plugin SHALL NOT require an existing AutoJs6 project to create a new project.
 
-#### Scenario: User opens generated project in AutoJs6 workflow
+#### Scenario: User creates a new project from an empty parent directory
 
-- **WHEN** a project is generated from the JetBrains template
-- **THEN** its files and metadata remain compatible with the historical AutoJs6 project runtime and do not require an incompatible migration step
+- **WHEN** no existing AutoJs6 project is present
+- **THEN** the plugin still creates a complete new project from the bundled template
+
+
 

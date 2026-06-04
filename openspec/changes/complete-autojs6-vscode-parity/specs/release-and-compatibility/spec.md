@@ -38,14 +38,14 @@ The plugin SHALL provide complete release documentation for user-managed publica
 
 ### Requirement: Enforce Four Non-Negotiable Rules
 
-The plugin SHALL enforce the four non-negotiable release rules: 100% historical project runtime compatibility, preserved user habits with JetBrains best practices, additive feature policy, and no mock/fake/speculative completion.
+The plugin SHALL enforce the four non-negotiable release rules: runtime/protocol compatibility plus built-in-template project scaffolding, preserved user habits with JetBrains best practices, additive feature policy, and no mock/fake/speculative completion.
 
 #### Scenario: Release candidate is audited
 
 - **WHEN** a parity release candidate is prepared
-- **THEN** the compatibility ledger demonstrates no historical-project breakage, no disruptive workflow rewrite, no missing claimed feature, and no mock/fake/speculative task completion
+- **THEN** the compatibility ledger demonstrates no runtime/protocol breakage and no existing-project dependency in New Project scaffolding, no disruptive workflow rewrite, no missing claimed feature, and no mock/fake/speculative task completion
 
-### Requirement: Preserve Historical Project Runtime Compatibility
+### Requirement: Preserve existing project Runtime Compatibility
 
 The plugin SHALL keep existing AutoJs6 projects runnable without incompatible migration, project format conversion, command renaming, path semantic changes, payload field changes, or protocol format changes.
 
@@ -53,3 +53,5 @@ The plugin SHALL keep existing AutoJs6 projects runnable without incompatible mi
 
 - **WHEN** a user opens an existing AutoJs6 project that works with the VSCode extension
 - **THEN** equivalent JetBrains project actions operate with compatible project layout, ignore rules, diff semantics, command names, and device payloads
+
+

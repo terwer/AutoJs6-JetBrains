@@ -2,7 +2,7 @@
 
 ## 不可妥协的规则
 
-1. 历史项目/运行时兼容性优先：已实现的命令使用已观察到的 VSCode 命令名称、端口、帧头和模板占位符。
+1. 协议/运行时兼容性优先：已实现的连接与脚本命令使用已观察到的端口、帧头和命令 payload；新建项目仅使用插件内置 AutoJs6 模板创建全新项目。
 2. 以 JetBrains UX 保留用户习惯：熟悉的 AutoJs6 操作名称通过 JetBrains Actions、Dialogs 和 Notifications 暴露。
 3. 功能集可以扩展，但不得通过声明收缩：MVP 仅声明文件级 run/save/stop/stopAll、连接模式和模板创建。
 4. 不做 mock/伪造/猜测：不可用流程要么报告错误，要么保持延后；不允许假成功、静态设备数据、空 zip、假 md5，或半实现的 HTTP endpoint。
@@ -38,6 +38,7 @@
 - 不存在 HTTP server 代码或 `/exec` route。
 - Script commands 仅在 `connectedDevices()` 非空时调用 `sendCommand`；否则显示错误。
 - 连接失败和 ADB 不可用时报告错误，而不是进入 connected/success 状态。
+
 
 
 

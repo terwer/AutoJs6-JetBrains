@@ -43,7 +43,7 @@
 | ▶️ **Run Script** | Run the currently open script on all connected devices with a single shortcut |
 | 💾 **Save to Device** | Push the current script to all connected devices |
 | ⏹️ **Stop Script** | Stop the current script or all running scripts at once |
-| 📁 **Project Template** | Scaffold a new AutoJs6 project from the built-in historical template |
+| 📁 **Project Template** | Scaffold a new AutoJs6 project from the built-in AutoJs6 template |
 | 📖 **Online Docs** | Jump to [docs.autojs6.com](https://docs.autojs6.com/) directly from the IDE |
 | ⌨️ **Keyboard-first** | Full keyboard shortcut support — stay in the flow without leaving your IDE |
 
@@ -182,3 +182,4 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 - [AutoJs6](https://github.com/SuperMonster003/AutoJs6) — The AutoJs6 Android app
 - [AutoJs6 VSCode Extension](https://github.com/niceSilentSam/AutoJs6-VSCode-Extension) — VSCode counterpart
 - [AutoJs6 Docs](https://docs.autojs6.com/) — Official documentation
+

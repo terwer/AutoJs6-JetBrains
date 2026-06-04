@@ -115,5 +115,19 @@ class MvpUnitTest {
         serverSide.close()
         server.close()
     }
+    @Test fun createsProjectFromBundledTemplate() {
+        val parent = java.nio.file.Files.createTempDirectory("autojs6-template-test")
+        val target = parent.resolve("My AutoJs6 App")
+        try {
+            AutoJs6ProjectTemplateService(null).createProject(target)
+            val projectJson = java.nio.file.Files.readString(target.resolve("project.json"))
+            assertTrue(java.nio.file.Files.exists(target.resolve("main.js")))
+            assertTrue(projectJson.contains("\"name\": \"My AutoJs6 App\""))
+            assertTrue(projectJson.contains("org.autojs.autojs6.my_autojs6_app"))
+        } finally {
+            target.toFile().deleteRecursively()
+            parent.toFile().deleteRecursively()
+        }
+    }
 }
 

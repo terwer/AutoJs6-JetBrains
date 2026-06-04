@@ -2,7 +2,7 @@
 
 
 
-- [ ] 0.1 Confirm and publish the four non-negotiable rules: 100% historical project runtime compatibility, preserved user habits with JetBrains best practices, additive feature policy, and no mock/fake/speculation.
+- [ ] 0.1 Confirm and publish the four non-negotiable rules: runtime/protocol compatibility plus built-in-template project scaffolding, preserved user habits with JetBrains best practices, additive feature policy, and no mock/fake/speculation.
 - [ ] 0.2 Add a compatibility ledger requiring evidence for every claimed command, protocol, project-sync, connection, UI, and release behavior.
 - [ ] 0.3 Add a no-mock gate: tasks cannot be checked complete if they rely on static data, fake success, unimplemented placeholders, guessed protocol fields, unverified publishing steps, or unverified IDE compatibility claims.
 - [ ] 1.1 Build a VSCode parity matrix from `package.json` commands, menus, keybindings, and breakpoints.
@@ -89,4 +89,7 @@
 - [ ] 9.5 Produce distributable plugin ZIP and metadata.
 - [ ] 9.6 Prepare and maintain `release-guide.md`: local ZIP build/install, Plugin Verifier, signing, Marketplace upload by the user, version/changelog preparation, approval checklist, private distribution, rollback, and troubleshooting.
 - [ ] 9.7 Mark parity matrix complete only when every command/protocol/UI row has passing evidence or an accepted documented difference.
-- [ ] 9.8 Run a final four-rule audit before release: no historical-project breakage, no disruptive workflow rewrite, no missing claimed features, no mock/fake/speculative completion, and no unverified IDE compatibility claim.
+- [ ] 9.8 Run a final four-rule audit before release: no runtime/protocol breakage, no disruptive workflow rewrite, no missing claimed features, no mock/fake/speculative completion, and no unverified IDE compatibility claim.
+
+
+

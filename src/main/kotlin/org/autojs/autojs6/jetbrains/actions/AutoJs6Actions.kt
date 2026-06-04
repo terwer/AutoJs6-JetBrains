@@ -81,9 +81,12 @@ class StopAllScriptsAction : AnAction() {
 
 class NewProjectAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
-        val project = e.project ?: return
-        AutoJs6ProjectTemplateService(project).chooseAndCreate()
+        val project = e.project
+        try {
+            AutoJs6ProjectTemplateService(project).chooseAndCreate()
+        } catch (t: Throwable) {
+            AutoJs6Notifier.error(project, "创建 AutoJs6 新项目失败: ${t.message}")
+            Messages.showErrorDialog(project, "创建 AutoJs6 新项目失败：\n${t.message}", "New AutoJs6 Project")
+        }
     }
 }
-
-
