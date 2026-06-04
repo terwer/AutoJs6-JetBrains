@@ -80,6 +80,9 @@ class MvpUnitTest {
         assertTrue(attached.await(3, TimeUnit.SECONDS))
         assertEquals("hello", readClientJson().string("type"))
 
+        // wait beyond the old handshake timeout to prove attached sockets stay alive
+        Thread.sleep(5500)
+
         ideDevice.sendCommand("run", mapOf("id" to "main.js", "name" to "main.js", "script" to "toast('run')"))
         assertEquals("run", readClientJson().obj("data")?.string("command"))
         ideDevice.sendCommand("save", mapOf("id" to "main.js", "name" to "main.js", "script" to "toast('save')"))
@@ -130,4 +133,5 @@ class MvpUnitTest {
         }
     }
 }
+
 

@@ -1,63 +1,58 @@
 ## ADDED Requirements
 
-### Requirement: Detect AutoJs6 Project
-The plugin SHALL treat a directory containing `project.json` as an AutoJs6 project and SHALL reject project commands when the file is missing.
+### Requirement: 检测 AutoJs6 Project
+插件 MUST把包含 `project.json` 的目录视为 AutoJs6 project；当文件缺失时，必须拒绝 project commands。
 
-#### Scenario: Project JSON is missing
-- **WHEN** the user invokes runProject or saveProject on a directory without `project.json`
-- **THEN** the plugin reports that an AutoJs6 project is required and does not send a project command
+#### Scenario: Project JSON 缺失
+- **WHEN** 用户在没有 `project.json` 的目录上调用 runProject 或 saveProject
+- **THEN** 插件报告需要 AutoJs6 project，且不发送 project command
 
-### Requirement: Load Project Configuration
-The plugin SHALL parse `project.json` and use its `ignore` entries to filter files during project synchronization.
+### Requirement: 加载 Project Configuration
+插件 MUST解析 `project.json`，并使用其中的 `ignore` entries 在 project synchronization 中过滤文件。
 
-#### Scenario: Ignored file exists
-- **WHEN** a file path matches an ignore entry from `project.json`
-- **THEN** the plugin excludes that file from the project diff payload
+#### Scenario: 存在 ignored file
+- **WHEN** 文件路径匹配 `project.json` 中的 ignore entry
+- **THEN** 插件从 project diff payload 中排除该文件
 
-### Requirement: Compute Project Diff
-The plugin SHALL maintain per-project/per-device file modification state and compute modified and deleted relative paths using file modification timestamps.
+### Requirement: 计算 Project Diff
+插件 MUST维护 per-project/per-device file modification state，并用 file modification timestamps 计算 modified 和 deleted relative paths。
 
-#### Scenario: File changes after first sync
-- **WHEN** a project file modification time changes after a previous sync
-- **THEN** the next project diff includes that relative path in modified files
+#### Scenario: 首次同步后文件发生变化
+- **WHEN** project file modification time 在 previous sync 后发生变化
+- **THEN** 下一次 project diff 在 modified files 中包含该 relative path
 
-#### Scenario: File is deleted after previous sync
-- **WHEN** a previously synced file no longer exists
-- **THEN** the next project diff includes that relative path in deletedFiles
+#### Scenario: 首次同步后文件被删除
+- **WHEN** previously synced file 不再存在
+- **THEN** 下一次 project diff 在 deletedFiles 中包含该 relative path
 
-### Requirement: Send Project Bytes Command
-The plugin SHALL zip modified files, compute md5 of the zip bytes, send bytes payload first, and then send a JSON `bytes_command` payload containing id, name, deletedFiles, override, and command.
+### Requirement: 发送 Project Bytes Command
+插件 MUST zip modified files，计算 zip bytes 的 md5，先发送 bytes payload，再发送包含 id、name、deletedFiles、override 和 command 的 JSON `bytes_command` payload。
 
-#### Scenario: User runs project
-- **WHEN** the user invokes runProject for a valid AutoJs6 project
-- **THEN** the plugin sends zip bytes followed by a `bytes_command` JSON payload with command `run_project`
+#### Scenario: 用户运行项目
+- **WHEN** 用户对有效 AutoJs6 project 调用 runProject
+- **THEN** 插件发送 zip bytes，随后发送 command 为 `run_project` 的 `bytes_command` JSON payload
 
-#### Scenario: User saves project
-- **WHEN** the user invokes saveProject for a valid AutoJs6 project
-- **THEN** the plugin sends zip bytes followed by a `bytes_command` JSON payload with command `save_project`
+#### Scenario: 用户保存项目
+- **WHEN** 用户对有效 AutoJs6 project 调用 saveProject
+- **THEN** 插件发送 zip bytes，随后发送 command 为 `save_project` 的 `bytes_command` JSON payload
 
-### Requirement: Report Project Sync Progress
-The plugin SHALL run project zip and md5 work in a background task with visible progress, cancellation handling, and error reporting.
+### Requirement: 报告 Project Sync Progress
+插件 MUST在 background task 中执行 project zip 和 md5 工作，并提供可见 progress、cancellation handling 和 error reporting。
 
 #### Scenario: Large project sync starts
-- **WHEN** the user invokes a project sync command on a non-trivial project
-- **THEN** the plugin shows progress and keeps the IDE UI responsive
+- **WHEN** 用户对 non-trivial project 调用 project sync command
+- **THEN** 插件显示 progress，并保持 IDE UI responsive
 
-### Requirement: Keep Project Sync Historically Compatible
-
-The plugin SHALL keep project synchronization behavior compatible with the VSCode extension semantics for project detection, ignore filtering, mtime diff state, zip relative paths, md5, deletedFiles, override, bytes payload ordering, and run_project/save_project command names.
+### Requirement: 保持 Project Sync 历史兼容
+插件 MUST保持 project synchronization 行为与 VSCode 扩展语义兼容，包括 project detection、ignore filtering、mtime diff state、zip relative paths、md5、deletedFiles、override、bytes payload ordering，以及 run_project/save_project command names。
 
 #### Scenario: Existing project is synchronized
+- **WHEN** 从 JetBrains 运行或保存 existing AutoJs6 project
+- **THEN** 生成的 bytes payload 和 JSON bytes_command 与现有 device-side expectations 兼容
 
-- **WHEN** an existing AutoJs6 project is run or saved from JetBrains
-- **THEN** the generated bytes payload and JSON bytes_command are compatible with the existing device-side expectations
+### Requirement: 禁止 Fake Project Sync Success
+当 zip creation、md5 calculation、bytes transfer、JSON bytes_command dispatch 或 device/replay verification 失败时，插件 MUST NOT报告 project sync success。
 
-### Requirement: Forbid Fake Project Sync Success
-
-The plugin SHALL NOT report project sync success when zip creation, md5 calculation, bytes transfer, JSON bytes_command dispatch, or device/replay verification fails.
-
-#### Scenario: Sync implementation is incomplete
-
-- **WHEN** any required project sync step is not implemented or not verified
-- **THEN** the plugin reports the step as failed, deferred, blocked, or requiring verification instead of pretending the project was synchronized
-
+#### Scenario: Sync implementation incomplete
+- **WHEN** 任一必需 project sync step 未实现或未验证
+- **THEN** 插件将该步骤报告为 failed、deferred、blocked 或 requiring verification，而不是假装项目已同步

@@ -4,6 +4,7 @@ import com.intellij.ide.BrowserUtil
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -22,7 +23,7 @@ class ConnectAction : AnAction() {
         val project = e.project ?: return
         val choice = Messages.showChooseDialog(project, "选择 AutoJs6 连接方式", "AutoJs6 Connect", null, arrayOf("IDE 监听客户端连接", "通过 IP 连接服务端", "通过 ADB 连接"), "通过 IP 连接服务端")
         when (choice) {
-            0 -> { project.getService(AutoJs6ConnectionService::class.java).startListening(); AutoJs6Notifier.info(project, "AutoJs6 IDE 监听已启动: ${AutoJs6Constants.IDE_LISTENING_PORT}") }
+            0 -> { service<AutoJs6ConnectionService>().startListening(project); AutoJs6Notifier.info(project, "AutoJs6 IDE 监听已启动: ${AutoJs6Constants.IDE_LISTENING_PORT}") }
             1 -> connectByIp(project)
             2 -> connectByAdb(project)
         }
@@ -30,7 +31,7 @@ class ConnectAction : AnAction() {
     private fun connectByIp(project: Project) {
         val host = Messages.showInputDialog(project, "输入 AutoJs6 服务端 Host/IP", "AutoJs6 Connect", null) ?: return
         if (host.isBlank()) return
-        project.getService(AutoJs6ConnectionService::class.java).connectTo(host.trim(), AutoJs6Constants.SERVER_PORT)
+        service<AutoJs6ConnectionService>().connectTo(host.trim(), AutoJs6Constants.SERVER_PORT, project = project)
     }
     private fun connectByAdb(project: Project) {
         val adb = project.getService(AdbService::class.java)
@@ -43,14 +44,14 @@ class ConnectAction : AnAction() {
 }
 
 class DisconnectAllAction : AnAction() {
-    override fun actionPerformed(e: AnActionEvent) { e.project?.getService(AutoJs6ConnectionService::class.java)?.disconnectAll() }
+    override fun actionPerformed(e: AnActionEvent) { service<AutoJs6ConnectionService>().disconnectAll(e.project) }
 }
 
 abstract class CurrentFileCommandAction(private val command: String) : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         val payload = currentFilePayload(project, e) ?: return
-        val sent = project.getService(AutoJs6ConnectionService::class.java).sendCommand(command, payload)
+        val sent = service<AutoJs6ConnectionService>().sendCommand(command, payload)
         if (!sent) AutoJs6Notifier.error(project, "未发现已连接的设备")
     }
 
@@ -74,7 +75,7 @@ class StopCurrentScriptAction : CurrentFileCommandAction("stop") {
 class StopAllScriptsAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        val sent = project.getService(AutoJs6ConnectionService::class.java).sendCommand("stopAll")
+        val sent = service<AutoJs6ConnectionService>().sendCommand("stopAll")
         if (!sent) AutoJs6Notifier.error(project, "未发现已连接的设备")
     }
 }

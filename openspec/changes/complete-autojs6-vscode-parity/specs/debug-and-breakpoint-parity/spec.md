@@ -1,22 +1,22 @@
 ## ADDED Requirements
 
-### Requirement: Preserve JavaScript Breakpoint Discoverability
-The plugin SHALL document and expose how JavaScript breakpoints relate to AutoJs6 script workflows in JetBrains IDEs.
+### Requirement: 保留 JavaScript breakpoint 可发现性
+插件 MUST记录并暴露 JavaScript breakpoints 与 AutoJs6 script workflows 在 JetBrains IDEs 中的关系。
 
-#### Scenario: User opens JavaScript file
-- **WHEN** a JavaScript file is open in the editor
-- **THEN** AutoJs6 documentation or help explains whether IDE breakpoints are supported, ignored, or require a future debug adapter
+#### Scenario: 用户打开 JavaScript file
+- **WHEN** JavaScript file 在 editor 中打开
+- **THEN** AutoJs6 documentation 或 help 说明 IDE breakpoints 当前是 supported、ignored，还是需要 future debug adapter
 
-### Requirement: Define Debug Boundary
-The plugin SHALL distinguish run/save command execution from full debugger attachment and SHALL not imply unsupported breakpoint stepping behavior.
+### Requirement: 定义 Debug Boundary
+插件 MUST区分 run/save command execution 与 full debugger attachment，且不得暗示不受支持的 breakpoint stepping behavior。
 
-#### Scenario: User invokes debug-related help
-- **WHEN** the user asks for AutoJs6 debug capability from plugin UI
-- **THEN** the plugin shows the current supported debug boundary and next steps
+#### Scenario: 用户调用 debug-related help
+- **WHEN** 用户从 plugin UI 请求 AutoJs6 debug capability
+- **THEN** 插件显示当前 supported debug boundary 和 next steps
 
-### Requirement: Prepare Future Debug Extension Point
-The plugin SHALL keep protocol and action architecture extensible for a future AutoJs6 debug adapter or debugger integration.
+### Requirement: 准备未来 Debug Extension Point
+插件 MUST保持 protocol 和 action architecture 可扩展，以便未来接入 AutoJs6 debug adapter 或 debugger integration。
 
-#### Scenario: Debug protocol is added later
-- **WHEN** a future change adds debugger support
-- **THEN** it can reuse existing device connection and command dispatch services without rewriting action parity
+#### Scenario: 未来加入 debug protocol
+- **WHEN** 后续 change 增加 debugger support
+- **THEN** 它可以复用现有 device connection 和 command dispatch services，而不需要重写 action parity

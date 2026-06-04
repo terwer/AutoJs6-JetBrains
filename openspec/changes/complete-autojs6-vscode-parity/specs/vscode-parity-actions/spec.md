@@ -1,40 +1,40 @@
 ## ADDED Requirements
 
-### Requirement: Register All VSCode Parity Actions
-The plugin SHALL provide JetBrains actions corresponding to all user-visible VSCode extension commands: viewDocument, connect, disconnectAll, run, runWithoutArguments, commandsHierarchy, runOnDevice, stop, stopAll, rerun, save, saveToDevice, newUntitledFile, newProject, saveProject, saveProjectWithoutArguments, runProject, and runProjectWithoutArguments.
+### Requirement: 注册全部 VSCode Parity Actions
+插件 MUST提供与所有用户可见 VSCode extension commands 对应的 JetBrains actions：viewDocument、connect、disconnectAll、run、runWithoutArguments、commandsHierarchy、runOnDevice、stop、stopAll、rerun、save、saveToDevice、newUntitledFile、newProject、saveProject、saveProjectWithoutArguments、runProject 和 runProjectWithoutArguments。
 
 #### Scenario: Plugin actions are loaded
-- **WHEN** the IDE loads the plugin
-- **THEN** every VSCode parity command is available through JetBrains action infrastructure
+- **WHEN** IDE 加载插件
+- **THEN** 每个 VSCode parity command 都可通过 JetBrains action infrastructure 使用
 
-### Requirement: Preserve Contextual Entry Points
-The plugin SHALL expose script actions from editor and Project View contexts and project actions from folder/project contexts.
+### Requirement: 保留上下文入口
+插件 MUST从 editor 和 Project View contexts 暴露 script actions，并从 folder/project contexts 暴露 project actions。
 
 #### Scenario: JavaScript file context is opened
-- **WHEN** the user opens the context menu for a JavaScript file
-- **THEN** run, runOnDevice, stop, stopAll, rerun, saveToDevice, and save actions are available
+- **WHEN** 用户打开 JavaScript file 的 context menu
+- **THEN** run、runOnDevice、stop、stopAll、rerun、saveToDevice 和 save actions 可用
 
 #### Scenario: Folder context is opened
-- **WHEN** the user opens the context menu for a folder or AutoJs6 project
-- **THEN** runProject, saveProject, and newProject actions are available
+- **WHEN** 用户打开 folder 或 AutoJs6 project 的 context menu
+- **THEN** runProject、saveProject 和 newProject actions 可用
 
-### Requirement: Support Suggested Keymap Parity
-The plugin SHALL register suggested keybindings or keymap metadata matching the VSCode extension intent while allowing JetBrains users to override conflicts.
+### Requirement: 支持 Suggested Keymap Parity
+插件 MUST注册 suggested keybindings 或 keymap metadata，使其匹配 VSCode 扩展意图，同时允许 JetBrains 用户覆盖冲突。
 
 #### Scenario: User searches keymap
-- **WHEN** the user searches for AutoJs6 actions in Keymap settings
-- **THEN** the actions show recommended shortcuts equivalent to the VSCode extension shortcuts where possible
+- **WHEN** 用户在 Keymap settings 中搜索 AutoJs6 actions
+- **THEN** actions 显示与 VSCode extension shortcuts 意图等价的 recommended shortcuts（在可行范围内）
 
 ### Requirement: Rerun Current Script
-The plugin SHALL implement rerun by stopping the current script and then running the current script again.
+插件 MUST通过先 stop 当前脚本再 run 当前脚本的方式实现 rerun。
 
 #### Scenario: User invokes rerun
-- **WHEN** a current editor file and device connection exist and the user invokes rerun
-- **THEN** the plugin sends stop for the current file and then sends run for the same file
+- **WHEN** 存在 current editor file 和 device connection，且用户调用 rerun
+- **THEN** 插件为同一文件先发送 stop，再发送 run
 
-### Requirement: Create New Untitled Script
-The plugin SHALL provide an action that creates a new unsaved editor document for quick AutoJs6 script drafting.
+### Requirement: 创建 New Untitled Script
+插件 MUST提供一个 action，用于创建新的 unsaved editor document，方便快速起草 AutoJs6 script。
 
 #### Scenario: User invokes newUntitledFile
-- **WHEN** the user invokes New Untitled File
-- **THEN** the IDE opens a new unsaved editor document ready for script editing
+- **WHEN** 用户调用 New Untitled File
+- **THEN** IDE 打开一个新的 unsaved editor document，准备进行 script editing

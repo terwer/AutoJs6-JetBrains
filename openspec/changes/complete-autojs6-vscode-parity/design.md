@@ -1,20 +1,19 @@
-## Context
+## 背景
 
 `add-autojs6-jetbrains-mvp` 建立了 JetBrains 插件的最小闭环：连接设备、运行/保存当前文件、停止脚本、新建项目。源 VSCode 扩展的真实能力更大，入口来自 `package.json` 的 18 个命令、editor/title 与 explorer/context 菜单、F6/F8/组合快捷键、JavaScript breakpoint 贡献，以及 `extension.ts`/`device.ts`/`project.ts`/`diff.ts`/`adb.ts` 中的协议和项目同步实现。
 
 本设计面向 MVP 之后的全面替代，不推翻 MVP，而是在 MVP 基础上补齐 VSCode parity。源扩展没有 `languages`/`grammars`/`configuration` 贡献点，因此“100% 替代 VSCode 插件”首先指设备调试工具链、命令入口和项目同步等行为等价，而不是重建 JavaScript 语言插件。
 
-## Goals / Non-Goals
+## 目标 / 非目标
 
+### 不可妥协的兼容规则
 
+1. **runtime/protocol compatibility plus built-in-template project scaffolding:** parity release 必须保留已实现流程的 AutoJs6 runtime/protocol 预期。New Project scaffolding 必须从插件内置 AutoJs6 模板创建全新项目，不复制或迁移现有项目。
+2. **Habit preservation with JetBrains best practice:** 从 VSCode 扩展迁移而来的用户必须能找到等价的命令名称、Action 意图、连接选项、项目上下文操作、快捷键建议和输出/日志概念；实现方式必须遵循 JetBrains Action System、Tool Window、Settings、Background Task、Notification 和 Disposer 生命周期实践。
+3. **Additive feature policy:** JetBrains-native diagnostics、Tool Window、Action Search、更安全的 HTTP controls 和发布文档都是 additive；它们不得替代、移除或静默削弱必需的 VSCode parity 行为。
+4. **Evidence over claims:** 任何 mock/fake/stub 行为都不能满足任务或 requirement。每个已完成 parity row 必须引用自动化测试、协议 replay、runIde 验证或真实 AutoJs6/ADB/manual 证据。未知项必须保持 open 或 blocked。
 
-## Non-Negotiable Compatibility Rules
-
-1. **runtime/protocol compatibility plus built-in-template project scaffolding:** the parity release SHALL preserve existing AutoJs6 runtime/protocol expectations for implemented flows. New Project scaffolding SHALL create a brand-new project from the plugin-bundled AutoJs6 template, not copy or migrate an existing project.
-2. **Habit preservation with JetBrains best practice:** users coming from the VSCode extension SHALL find equivalent command names, action intent, connection choices, project context actions, keymap recommendations, and output/log concepts, while implementation follows JetBrains Action System, Tool Window, Settings, background task, notification, and Disposer lifecycle practices.
-3. **Additive feature policy:** JetBrains-native diagnostics, Tool Window, action search, safer HTTP controls, and publishing docs are additive; they must not replace, remove, or silently weaken required VSCode parity behavior.
-4. **Evidence over claims:** no mock/fake/stub behavior may satisfy a task or requirement. Each completed parity row must cite automated tests, protocol replay, runIde verification, or real AutoJs6/ADB/manual evidence. Unknowns must stay open or blocked.
-**Goals:**
+**目标：**
 
 - 以 VSCode 扩展 `package.json` 和运行时代码为基准，建立可测试的 parity 矩阵。
 - 补齐所有用户可见命令、上下文菜单、建议快捷键和错误提示路径。
@@ -22,14 +21,14 @@
 - 提供设备 Tool Window、日志输出、连接诊断和状态栏，让 JetBrains 版本比 VSCode 版本更易用。
 - 保持协议层、项目层、UI 层可单独测试，避免一次性大爆炸实现。
 
-**Non-Goals:**
+**非目标：**
 
 - 不在本提案中变更 AutoJs6 App 设备侧协议；默认兼容现有 VSCode 扩展协议。
 - 不把 JetBrains 版本绑定为单一 IDE；目标是 JetBrains IDE 全家桶通用支持。实现必须优先使用通用 IntelliJ Platform API 和最小必要 module 依赖；个别 IDE 如确实无法支持，必须进入兼容例外矩阵并说明原因、影响、替代方案和验证证据。
 - 不承诺实现完整 JavaScript 语言服务、语义补全或 AutoJs6 API 类型系统；可作为后续独立提案，但不得降低 JetBrains IDE 已有 JavaScript 使用体验。
 - 不默认开放 HTTP 远程命令入口；必须提供安全开关、绑定地址和风险提示。
 
-## Decisions
+## 决策
 
 1. **以 parity 矩阵驱动，而不是凭记忆补功能**
    - 决策：建立 `VSCode command/menu/keybinding/source behavior → JetBrains action/UI/test` 映射表。
@@ -52,7 +51,7 @@
    - 决策：实现 `/exec` parity，但默认绑定 loopback 或默认关闭；用户显式开启才绑定 `0.0.0.0`。
    - 理由：源扩展直接监听 `0.0.0.0:10347`，JetBrains 版本应保留兼容能力但降低误暴露风险。
 
-## Risks / Trade-offs
+## 风险 / 权衡
 
 | 风险 | 影响 | 缓解 |
 |---|---|---|
@@ -61,7 +60,7 @@
 | JetBrains 快捷键冲突 | 默认 keymap 可能不可用 | 注册建议快捷键并允许用户覆盖；验收以 Action 可达为准 |
 | 项目同步大文件性能 | zip/md5 可能阻塞 UI | 后台任务、进度、取消、大小限制和输出日志 |
 
-## Migration Plan
+## 迁移计划
 
 1. 先完成 MVP 并归档/稳定其 capability。
 2. 建立 parity 矩阵和协议回放样本，作为本提案实施的入口任务。
@@ -69,13 +68,8 @@
 4. 每阶段用 `runIde`、单元测试、集成测试和 AutoJs6 设备实测更新矩阵。
 5. 若某阶段失败，允许关闭对应增强 capability，不影响 MVP 功能；已启用的 HTTP/ADB/Socket 资源必须可 dispose 清理。关闭或延期必须在 parity 矩阵中标注，不得以 mock/fake/推测状态冒充完成。
 
-## Confirmed Requirements
+## 已确认需求
 
 - 目标是 VSCode 扩展全量功能对齐，不新增独立自研功能范围来替代 parity。
 - 需要发布能力，但由用户自行发布；项目必须提供完整发布文档 `release-guide.md`，覆盖版本准备、构建、签名、Plugin Verifier、Marketplace 上传、私有 ZIP 分发、回滚和问题排查步骤。
 - 目标 IDE 为 JetBrains IDE 全家桶通用支持，禁止绑定某一个 IDE；如个别 IDE 确实无法兼容，必须列入例外矩阵并给出证据、原因、影响和替代方案。
-
-
-
-
-

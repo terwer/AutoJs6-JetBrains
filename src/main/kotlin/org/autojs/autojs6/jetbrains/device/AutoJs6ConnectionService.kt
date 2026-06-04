@@ -90,6 +90,7 @@ class AutoJs6Device(
             return
         }
         deviceId = data.string("device_id") ?: ""
+        socket.soTimeout = 0
         sendHello()
         attached = true
         onAttach(this)
@@ -99,8 +100,9 @@ class AutoJs6Device(
     override fun toString(): String = "$deviceName (${socket.inetAddress.hostAddress}:${socket.port})"
 }
 
-@Service(Service.Level.PROJECT)
-class AutoJs6ConnectionService(private val project: Project) : Disposable {
+@Service(Service.Level.APP)
+class AutoJs6ConnectionService : Disposable {
+    @Volatile private var notificationProject: Project? = null
     private val executor = Executors.newCachedThreadPool { r -> Thread(r, "AutoJs6-connection").apply { isDaemon = true } }
     private val devices = CopyOnWriteArrayList<AutoJs6Device>()
     @Volatile private var serverSocket: ServerSocket? = null
@@ -109,7 +111,8 @@ class AutoJs6ConnectionService(private val project: Project) : Disposable {
 
     fun connectedDevices(): List<AutoJs6Device> = devices.filter { it.attached }
 
-    fun startListening(port: Int = AutoJs6SettingsService.getInstance().state.listeningPort) {
+    fun startListening(project: Project? = null, port: Int = AutoJs6SettingsService.getInstance().state.listeningPort) {
+        if (project != null) notificationProject = project
         if (serverSocket?.isClosed == false) return
         executor.submit {
             try {
@@ -119,26 +122,27 @@ class AutoJs6ConnectionService(private val project: Project) : Disposable {
                 serverSocket = ss
                 while (!ss.isClosed) {
                     val socket = ss.accept()
-                    AutoJs6Device(socket, ::attach, ::detach, project)
+                    AutoJs6Device(socket, ::attach, ::detach, notificationProject)
                 }
             } catch (t: Throwable) {
                 if (serverSocket?.isClosed != true) {
                     serverSocket?.close()
                     serverSocket = null
-                    AutoJs6Notifier.error(project, "无法监听 AutoJs6 端口 $port: ${t.message}")
+                    AutoJs6Notifier.error(notificationProject, "无法监听 AutoJs6 端口 $port: ${t.message}")
                 }
             }
         }
     }
 
-    fun connectTo(host: String, port: Int = AutoJs6SettingsService.getInstance().state.serverPort, adbDeviceId: String? = null) {
+    fun connectTo(host: String, port: Int = AutoJs6SettingsService.getInstance().state.serverPort, adbDeviceId: String? = null, project: Project? = null) {
+        if (project != null) notificationProject = project
         executor.submit {
             try {
                 val socket = Socket()
                 socket.connect(InetSocketAddress(host, port), 5000)
-                AutoJs6Device(socket, { dev -> attach(dev); if (adbDeviceId == null) AutoJs6SettingsService.getInstance().addRecentHost(host) }, ::detach, project, adbDeviceId, host)
+                AutoJs6Device(socket, { dev -> attach(dev); if (adbDeviceId == null) AutoJs6SettingsService.getInstance().addRecentHost(host) }, ::detach, notificationProject, adbDeviceId, host)
             } catch (t: Throwable) {
-                AutoJs6Notifier.error(project, "连接 AutoJs6 服务端 $host:$port 失败: ${t.message}")
+                AutoJs6Notifier.error(notificationProject, "连接 AutoJs6 服务端 $host:$port 失败: ${t.message}")
             }
         }
     }
@@ -150,15 +154,16 @@ class AutoJs6ConnectionService(private val project: Project) : Disposable {
         return true
     }
 
-    fun disconnectAll() {
+    fun disconnectAll(project: Project? = null) {
+        if (project != null) notificationProject = project
         devices.forEach { it.close() }
         devices.clear()
-        AutoJs6Notifier.info(project, "已断开所有 AutoJs6 设备连接")
+        AutoJs6Notifier.info(notificationProject, "已断开所有 AutoJs6 设备连接")
     }
 
     private fun attach(device: AutoJs6Device) {
         if (!devices.contains(device)) devices += device
-        AutoJs6Notifier.info(project, "AutoJs6 设备已连接: $device")
+        AutoJs6Notifier.info(notificationProject, "AutoJs6 设备已连接: $device")
     }
 
     private fun detach(device: AutoJs6Device) { devices.remove(device) }

@@ -1,26 +1,26 @@
 ## ADDED Requirements
 
-### Requirement: Provide HTTP Exec Endpoint
-The plugin SHALL provide a configurable HTTP `/exec` endpoint compatible with VSCode extension query parameters `cmd` and `path`.
+### Requirement: 提供 HTTP Exec Endpoint
+插件 MUST提供 configurable HTTP `/exec` endpoint，并兼容 VSCode 扩展 query parameters `cmd` 和 `path`。
 
 #### Scenario: Valid exec command arrives
-- **WHEN** an HTTP request is received at `/exec` with a supported `cmd`
-- **THEN** the plugin dispatches the corresponding AutoJs6 action with the provided path parameter
+- **WHEN** HTTP request 到达 `/exec`，且包含 supported `cmd`
+- **THEN** 插件使用提供的 path parameter 分发对应 AutoJs6 action
 
-### Requirement: Protect HTTP Bridge By Default
-The plugin SHALL keep the HTTP bridge disabled or loopback-bound by default and SHALL require explicit user configuration for wider network binding.
+### Requirement: 默认保护 HTTP Bridge
+插件 MUST默认保持 HTTP bridge disabled 或 loopback-bound，并且 wider network binding 必须要求明确 user configuration。
 
 #### Scenario: Fresh plugin install
-- **WHEN** the plugin starts for the first time
-- **THEN** the HTTP bridge is not exposed on all network interfaces without explicit user consent
+- **WHEN** 插件首次启动
+- **THEN** HTTP bridge 不会在没有 explicit user consent 的情况下暴露到所有 network interfaces
 
-### Requirement: Handle Device Reverse Commands
-The plugin SHALL process device-originated command payloads only when the command is in the supported parity action list.
+### Requirement: 处理 Device Reverse Commands
+插件 MUST 只允许处理 command 在 supported parity action list 中的 device-originated command payloads。
 
 #### Scenario: Device sends supported command
-- **WHEN** a connected device sends a command payload with a supported command name
-- **THEN** the plugin dispatches that command through the same action path as user invocation
+- **WHEN** connected device 发送包含 supported command name 的 command payload
+- **THEN** 插件通过与用户调用相同的 action path 分发该 command
 
 #### Scenario: Device sends unknown command
-- **WHEN** a connected device sends a command payload with an unknown command name
-- **THEN** the plugin rejects the command and reports an error without executing arbitrary behavior
+- **WHEN** connected device 发送包含 unknown command name 的 command payload
+- **THEN** 插件拒绝该 command 并报告错误，不执行任意行为

@@ -1,57 +1,51 @@
 ## ADDED Requirements
 
-### Requirement: Define Supported JetBrains IDE Matrix
-The plugin SHALL define and test a support matrix covering the JetBrains IDE family and versions for VSCode replacement use, defaulting to every JetBrains IntelliJ Platform IDE that contains the required platform modules.
+### Requirement: 定义 Supported JetBrains IDE Matrix
+插件 MUST定义并测试 support matrix，覆盖用于 VSCode replacement 的 JetBrains IDE family 和 versions；默认目标是每个包含所需 platform modules 的 JetBrains IntelliJ Platform IDE。
 
 #### Scenario: Release candidate is prepared
-- **WHEN** a release candidate is built
-- **THEN** it is validated against the declared IDE/version matrix and any unsupported IDE is listed in an exception matrix with evidence, reason, impact, and workaround
+- **WHEN** 准备 release candidate
+- **THEN** 它已针对 declared IDE/version matrix 验证，且任何 unsupported IDE 都进入 exception matrix，并附 evidence、reason、impact 和 workaround
 
-### Requirement: Package Resources And ADB Strategy
-The plugin SHALL define how icons, templates, docs, and ADB binaries are packaged across operating systems.
+### Requirement: 打包资源与 ADB Strategy
+插件 MUST定义 icons、templates、docs 和 ADB binaries 在各 operating systems 下的打包方式。
 
 #### Scenario: Plugin runs on Windows
-- **WHEN** ADB is not available on PATH and bundled Windows ADB is packaged
-- **THEN** the plugin can use the bundled executable as fallback
+- **WHEN** ADB 不在 PATH 中且 bundled Windows ADB 已打包
+- **THEN** 插件可使用 bundled executable 作为 fallback
 
 #### Scenario: Plugin runs on non-Windows OS
-- **WHEN** ADB is needed
-- **THEN** the plugin uses configured or PATH ADB unless an explicit platform bundle is provided
+- **WHEN** 需要 ADB
+- **THEN** 插件使用 configured 或 PATH ADB，除非提供明确的 platform bundle
 
-### Requirement: Maintain Regression Parity Matrix
-The plugin SHALL maintain a regression matrix mapping every VSCode parity command and protocol behavior to automated or manual verification steps.
+### Requirement: 维护 Regression Parity Matrix
+插件 MUST维护 regression matrix，将每个 VSCode parity command 和 protocol behavior 映射到 automated 或 manual verification steps。
 
 #### Scenario: Parity release is validated
-- **WHEN** all parity tasks are claimed complete
-- **THEN** every matrix row has passing evidence or a documented accepted difference
+- **WHEN** 声称所有 parity tasks 已完成
+- **THEN** 每个 matrix row 都有 passing evidence 或 documented accepted difference
 
-### Requirement: Prepare User-Published Release Documentation
-The plugin SHALL provide complete release documentation for user-managed publication, including local ZIP distribution, Marketplace publication by the user, signing, Plugin Verifier, versioning, changelog, rollback, and troubleshooting steps.
+### Requirement: 准备用户自行发布文档
+插件 MUST提供完整的 user-managed publication 文档，包括 local ZIP distribution、Marketplace publication by the user、signing、Plugin Verifier、versioning、changelog、rollback 和 troubleshooting steps。
 
-#### Scenario: User prepares a Marketplace release
-- **WHEN** the user wants to publish the plugin personally
-- **THEN** the documentation provides step-by-step commands and checklist items for building, verifying, signing, uploading, submitting, and monitoring the release
+#### Scenario: 用户准备 Marketplace release
+- **WHEN** 用户想亲自发布插件
+- **THEN** 文档提供 build、verify、sign、upload、submit 和 monitor release 的逐步命令与 checklist items
 
-#### Scenario: User prepares a private ZIP release
-- **WHEN** the user wants to distribute the plugin without Marketplace publication
-- **THEN** the documentation provides plugin ZIP build, local installation, private sharing, rollback, and compatibility verification steps
+#### Scenario: 用户准备 private ZIP release
+- **WHEN** 用户想在不通过 Marketplace 的情况下分发插件
+- **THEN** 文档提供 plugin ZIP build、local installation、private sharing、rollback 和 compatibility verification steps
 
-### Requirement: Enforce Four Non-Negotiable Rules
-
-The plugin SHALL enforce the four non-negotiable release rules: runtime/protocol compatibility plus built-in-template project scaffolding, preserved user habits with JetBrains best practices, additive feature policy, and no mock/fake/speculative completion.
+### Requirement: 执行四条不可妥协规则
+插件 MUST执行四条 non-negotiable release rules：runtime/protocol compatibility plus built-in-template project scaffolding、preserved user habits with JetBrains best practices、additive feature policy，以及 no mock/fake/speculative completion。
 
 #### Scenario: Release candidate is audited
+- **WHEN** 准备 parity release candidate
+- **THEN** compatibility ledger 证明没有 runtime/protocol breakage、New Project scaffolding 不依赖 existing-project、没有 disruptive workflow rewrite、没有 missing claimed feature，且没有 mock/fake/speculative task completion
 
-- **WHEN** a parity release candidate is prepared
-- **THEN** the compatibility ledger demonstrates no runtime/protocol breakage and no existing-project dependency in New Project scaffolding, no disruptive workflow rewrite, no missing claimed feature, and no mock/fake/speculative task completion
+### Requirement: 保留 existing project Runtime Compatibility
+插件 MUST让 existing AutoJs6 projects 在无需 incompatible migration、project format conversion、command renaming、path semantic changes、payload field changes 或 protocol format changes 的情况下继续可运行。
 
-### Requirement: Preserve existing project Runtime Compatibility
-
-The plugin SHALL keep existing AutoJs6 projects runnable without incompatible migration, project format conversion, command renaming, path semantic changes, payload field changes, or protocol format changes.
-
-#### Scenario: Existing AutoJs6 project is used
-
-- **WHEN** a user opens an existing AutoJs6 project that works with the VSCode extension
-- **THEN** equivalent JetBrains project actions operate with compatible project layout, ignore rules, diff semantics, command names, and device payloads
-
-
+#### Scenario: 使用 existing AutoJs6 project
+- **WHEN** 用户打开一个可配合 VSCode 扩展工作的 existing AutoJs6 project
+- **THEN** 等价 JetBrains project actions 使用兼容的 project layout、ignore rules、diff semantics、command names 和 device payloads 运行

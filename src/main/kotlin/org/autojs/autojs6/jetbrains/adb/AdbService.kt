@@ -2,6 +2,7 @@ package org.autojs.autojs6.jetbrains.adb
 
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.autojs.autojs6.jetbrains.AutoJs6Constants
 import org.autojs.autojs6.jetbrains.AutoJs6Notifier
@@ -58,7 +59,7 @@ class AdbService(private val project: Project) {
             AutoJs6Notifier.error(project, "ADB forward 失败: ${forward.stderr.ifBlank { forward.stdout }}")
             return
         }
-        project.getService(AutoJs6ConnectionService::class.java).connectTo("127.0.0.1", localPort, device.id)
+        service<AutoJs6ConnectionService>().connectTo("127.0.0.1", localPort, device.id, project)
     }
 
     private fun run(vararg command: String): ProcResult {
@@ -83,4 +84,3 @@ class AdbService(private val project: Project) {
 }
 
 data class ProcResult(val exitCode: Int, val stdout: String, val stderr: String)
-

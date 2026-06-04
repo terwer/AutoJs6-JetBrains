@@ -1,19 +1,18 @@
-## Why
+## 为什么
 
 `add-autojs6-jetbrains-mvp` 适合作为第一版可运行插件，但它主动排除了大量 VSCode 扩展能力：项目差量同步、指定设备操作、HTTP 远程命令、设备日志/反向命令、完整连接向导、快捷命令层级、重新运行、新建未命名脚本、调试/断点与发布体验。若目标是让 `AutoJs6-JetBrains` 在 MVP 后 100% 替代 VSCode 插件，需要一个独立的 post-MVP 全面对齐提案。
 
-## What Changes
+## 变更内容
 
+### 不可妥协的兼容规则
 
+本变更用于在 full-parity 阶段继续执行同一组规则：
 
-### Non-Negotiable Compatibility Rules
+1. **历史项目兼容优先。** 现有 AutoJs6 项目和 VSCode-extension-compatible 工作流必须继续运行，不要求迁移、格式转换、不兼容路径规则或协议变更。
+2. **保留用户习惯，同时采用 JetBrains best practices。** JetBrains-native UX 必须提升可发现性和可靠性，但不得移除用户熟悉的命令、快捷键意图、连接流程、项目行为或 run/save/stop 心智模型。
+3. **功能集可以增加，但不能减少。** parity 表示每个 VSCode extension command、菜单意图、协议行为、project sync 行为、连接路径和可见工作流都必须有通过证据，或有明确批准并记录的例外；JetBrains-only 增强只能是 additive。
+4. **禁止 mock、fake 或 speculative implementation。** 声称支持必须有真实实现和验证。设备协议细节、HTTP 行为、ADB provider 行为、debugger 限制、发布步骤和 IDE 兼容性必须被验证或在实现前清晰标记，不能猜测。
 
-This change exists to enforce the same rules at full-parity level:
-
-1. **Historical project compatibility first.** Existing AutoJs6 projects and VSCode-extension-compatible workflows SHALL continue to run without migration, format conversion, incompatible path rules, or protocol changes.
-2. **Preserve user habits while adopting JetBrains best practices.** JetBrains-native UX must improve discoverability and reliability without removing familiar commands, shortcut intent, connection flows, project behavior, or run/save/stop mental models.
-3. **Feature set can grow but must not shrink.** Parity means every VSCode extension command, menu intent, protocol behavior, project sync behavior, connection path, and visible workflow has passing evidence or an explicitly approved documented exception; JetBrains-only enhancements are additive.
-4. **No mock, fake, or speculative implementation.** Claimed support requires real implementation and verification. Device protocol details, HTTP behavior, ADB provider behavior, debugger limits, publishing steps, and IDE compatibility must be verified or marked clearly before implementation, not guessed.
 新增 MVP 之后的全面对齐路线：
 
 - 补齐 VSCode 扩展 18 个命令及其菜单/快捷键/Project View/Editor 入口。
@@ -28,7 +27,7 @@ This change exists to enforce the same rules at full-parity level:
 
 ## Capabilities
 
-### New Capabilities
+### 新增 Capabilities
 
 - `vscode-parity-actions`: 覆盖 VSCode 扩展全部命令、菜单入口、快捷键建议与上下文约束。
 - `project-diff-sync`: AutoJs6 项目识别、配置读取、ignore 过滤、差量 zip、md5、deletedFiles、run_project/save_project。
@@ -38,16 +37,14 @@ This change exists to enforce the same rules at full-parity level:
 - `debug-and-breakpoint-parity`: JavaScript breakpoint 贡献等价、脚本调试入口规划和后续调试协议扩展边界。
 - `release-and-compatibility`: JetBrains IDE 全家桶兼容、用户自行发布文档、Marketplace/ZIP 发布步骤、资源/ADB 打包、回归测试矩阵。
 
-### Modified Capabilities
+### 修改 Capabilities
 
 无。当前 `openspec/specs` 尚无已归档 capability；本提案作为 MVP 之后的新 capability 集合。实现时应以 `add-autojs6-jetbrains-mvp` 为前置基线。
 
-## Impact
+## 影响范围
 
 - 影响 JetBrains 插件 Action、Tool Window、Status Bar、Settings、PersistentState、Editor/VirtualFile、Project View、Notifications、BrowserUtil、Disposer 生命周期。
 - 影响设备协议层：JSON/bytes frame、`bytes_command`、设备反向 command、日志事件、HTTP server。
 - 影响本地文件系统：项目遍历、ignore 过滤、zip、md5、文件 watcher、模板/片段资源。
 - 影响外部进程：ADB 执行、provider 查询、端口 forward、跨平台工具定位。
 - 影响质量体系：协议单元测试、集成测试、设备回放、runIde 验证、JetBrains IDE 全家桶兼容验证与发布检查。
-
-
