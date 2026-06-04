@@ -1,0 +1,171 @@
+# 进度日志
+
+## 会话：2026-06-05
+
+### 阶段 1：需求与发现
+- **状态：** in_progress
+- **开始时间：** 2026-06-05 Asia/Shanghai
+- 执行的操作：
+  - 读取 `planning-with-files-zh` 技能说明。
+  - 创建目标目录 `D:\Users\Administrator\Documents\myproject\AutoJs6-JetBrains`。
+  - 创建规划目录 `.planning/2026-06-05-autojs6-jetbrains-explore/`。
+  - 写入 `.planning/.active_plan`、`task_plan.md`、`findings.md`、`progress.md`。
+- 创建/修改的文件：
+  - `.planning/.active_plan`
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/task_plan.md`
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/findings.md`
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/progress.md`
+
+## 测试结果
+| 测试 | 输入 | 预期结果 | 实际结果 | 状态 |
+|------|------|---------|---------|------|
+| 规划目录创建 | 目标路径 | 出现 `.planning` 和三份计划文件 | 已创建 | 通过 |
+
+## 错误日志
+| 时间戳 | 错误 | 尝试次数 | 解决方案 |
+|--------|------|---------|---------|
+| 2026-06-05 | `New-Item -LiteralPath` 参数不可用 | 1 | 改用 `New-Item -Path` |
+
+## 五问重启检查
+| 问题 | 答案 |
+|------|------|
+| 我在哪里？ | 阶段 1：需求与发现 |
+| 我要去哪里？ | 探索源 VSCode 扩展并形成 JetBrains 迁移计划 |
+| 目标是什么？ | 不写业务代码，仅探索并规划 IDEA/JetBrains 插件版本 |
+| 我学到了什么？ | 见 findings.md |
+| 我做了什么？ | 见上方记录 |
+
+---
+*每个阶段完成后或遇到错误时更新此文件*
+
+### 阶段 1 增量：源项目初扫
+- **状态：** in_progress
+- 执行的操作：
+  - 读取活跃计划文件以恢复目标。
+  - 列出源项目 `src/` 文件。
+  - 解析 `package.json` 的基本字段和命令贡献点。
+  - 使用 `rg` 检索网络、ADB、命令注册和 AutoJs6 相关入口。
+- 发现已写入 `findings.md`。
+
+### 阶段 1 增量：贡献点与核心代码切片
+- **状态：** in_progress
+- 执行的操作：
+  - 用 Node 解析 `package.json` 的 menus/keybindings/languages/grammars/configuration。
+  - 查看 `extension.ts`、`device.ts` 关键区间：构造、命令注册、用户命令、激活入口、设备协议。
+- 发现已写入 `findings.md`。
+
+### 阶段 1/2 增量：资源、同步协议和功能映射
+- **状态：** in_progress
+- 执行的操作：
+  - 查看 `assets/`、`tools/` 资源。
+  - 查看 `project.ts` 与 `diff.ts` 的项目模板、项目配置、差量 zip 同步逻辑。
+  - 检索协议端口、帧头、AutoJs6 最低版本、`sendProjectCommand`。
+  - 查阅 JetBrains 官方 SDK 文档用于高层技术映射。
+- 发现和映射草案已写入 `findings.md`。
+
+### 阶段状态更新
+- 阶段 1 已完成：源项目结构、清单、命令、配置、源码入口已初步检查。
+- 阶段 2 已完成：已形成 VSCode → JetBrains 功能映射与风险草案。
+- 阶段 3 进入进行中：已给出技术栈/MVP 草案，尚未细化依赖和构建策略；未开始写业务代码。
+
+### Opspec 提案生成
+- **状态：** complete
+- 执行的操作：
+  - 评估当前探索信息是否足够进入 MVP 提案阶段。
+  - 生成 `opspec_proposal.md`，仅包含规划/需求/架构/验收标准，不包含业务代码。
+  - 更新 `task_plan.md` 阶段状态。
+- 创建/修改的文件：
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/opspec_proposal.md`
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/task_plan.md`
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/progress.md`
+
+### OpenSpec 正式提案生成
+- **状态：** complete
+- 执行的操作：
+  - 确认 `openspec` CLI 已安装。
+  - 确认项目已有 `openspec/`、`openspec/changes/`、`openspec/specs/`、`openspec/config.yaml`。
+  - 使用 `openspec new change add-autojs6-jetbrains-mvp` 创建正式 OpenSpec change。
+  - 生成 `proposal.md`、`design.md`、`tasks.md`。
+  - 生成三个 capability delta spec：`device-connection`、`script-command-actions`、`autojs6-project-template`。
+  - 第一次 validate 失败：部分 Requirement 文本使用 SHOULD，不符合 OpenSpec 校验要求。
+  - 修改为 SHALL 后重新执行 `openspec validate add-autojs6-jetbrains-mvp`，结果通过。
+- 创建/修改的 OpenSpec 文件：
+  - `openspec/changes/add-autojs6-jetbrains-mvp/.openspec.yaml`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/proposal.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/design.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/tasks.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/specs/device-connection/spec.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/specs/script-command-actions/spec.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/specs/autojs6-project-template/spec.md`
+
+### 本轮审视 add-autojs6-jetbrains-mvp
+- **状态：** in_progress
+- 执行的操作：
+  - 读取现有 OpenSpec MVP 提案、design、tasks 和 delta specs。
+  - 重新解析源 VSCode 扩展的 `package.json` 贡献点。
+  - 抽取 `extension.ts`、`device.ts`、`project.ts`、`diff.ts`、`adb.ts` 关键功能证据。
+- 初步结论：MVP 对“第一版可运行”合理，但距离“100% 替代 VSCode 插件 + 自有增强能力”差距较大，应新建 post-MVP 全面对齐提案。
+
+### OpenSpec post-MVP 全面对齐提案生成
+- **状态：** complete
+- 执行的操作：
+  - 新建 `openspec/changes/complete-autojs6-vscode-parity`。
+  - 写入 post-MVP 提案，目标为 MVP 后 100% 替代 VSCode 插件。
+  - 写入设计文档，明确 parity 矩阵、协议 core、项目同步、Tool Window、HTTP 安全和发布/兼容边界。
+  - 写入 8 个 capability delta specs：
+    - `vscode-parity-actions`
+    - `project-diff-sync`
+    - `device-tool-window-and-logs`
+    - `advanced-connection-experience`
+    - `remote-command-bridge`
+    - `debug-and-breakpoint-parity`
+    - `release-and-compatibility`
+  - 写入 `tasks.md`，共 9 个任务组、61 项可追踪任务。
+  - 执行 `openspec validate complete-autojs6-vscode-parity`，结果通过。
+- 结论：`add-autojs6-jetbrains-mvp` 适合作为第一阶段，但不是 100% 替代方案；新的 `complete-autojs6-vscode-parity` 用于 MVP 后全面追齐和增强。
+
+
+### 阶段 7：四规则固化
+- **状态：** complete
+- 执行的操作：
+  - 读取并审视 `add-autojs6-jetbrains-mvp` 与 `complete-autojs6-vscode-parity` 的 proposal/design/tasks/specs。
+  - 在两份 proposal/design/tasks 中加入不可违背规则、compatibility ledger、no-mock gate 和 release audit。
+  - 在 specs 中追加约束：真实协议兼容、真实命令完成、历史模板兼容、项目同步历史兼容、禁止假项目同步成功、release 四规则门禁。
+  - 执行 OpenSpec 校验。
+- 创建/修改的文件：
+  - `openspec/changes/add-autojs6-jetbrains-mvp/proposal.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/design.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/tasks.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/specs/device-connection/spec.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/specs/script-command-actions/spec.md`
+  - `openspec/changes/add-autojs6-jetbrains-mvp/specs/autojs6-project-template/spec.md`
+  - `openspec/changes/complete-autojs6-vscode-parity/proposal.md`
+  - `openspec/changes/complete-autojs6-vscode-parity/design.md`
+  - `openspec/changes/complete-autojs6-vscode-parity/tasks.md`
+  - `openspec/changes/complete-autojs6-vscode-parity/specs/release-and-compatibility/spec.md`
+  - `openspec/changes/complete-autojs6-vscode-parity/specs/project-diff-sync/spec.md`
+- 测试结果：
+  - `openspec validate add-autojs6-jetbrains-mvp`：通过。
+  - `openspec validate complete-autojs6-vscode-parity`：通过。
+
+### 阶段 8：发布与兼容目标落盘
+- **状态：** complete
+- 执行的操作：
+  - 将 parity 提案范围统一为 VSCode full parity。
+  - 移除非 parity capability spec 及空目录。
+  - 新增 `openspec/changes/complete-autojs6-vscode-parity/release-guide.md`。
+  - 修改 MVP 与 parity 的 IDE 兼容策略：默认 JetBrains 全家桶通用支持，个别例外必须列矩阵。
+  - 修改 release-and-compatibility spec，要求用户自行发布文档和完整步骤。
+- 测试结果：
+  - `openspec validate add-autojs6-jetbrains-mvp`：通过。
+  - `openspec validate complete-autojs6-vscode-parity`：通过。
+
+### 阶段 9：范围表述清理
+- **状态：** complete
+- 执行的操作：
+  - 移除 OpenSpec 与规划文件中可能导致后续实现误读的历史范围说明。
+  - 将对应任务改为“只保留 VSCode full parity 与批准的 JetBrains-native 展示/诊断辅助”。
+  - 执行全局关键词扫描，确认无残留混淆词。
+- 测试结果：
+  - `openspec validate add-autojs6-jetbrains-mvp`：通过。
+  - `openspec validate complete-autojs6-vscode-parity`：通过。
