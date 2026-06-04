@@ -63,7 +63,7 @@ class AutoJs6ProjectTemplateService(private val project: Project) {
     companion object {
         fun normalizePackageSuffix(name: String): String {
             var s = Normalizer.normalize(name, Normalizer.Form.NFKD).replace(Regex("\\p{M}+"), "")
-            s = s.map { ch -> if (ch.isLetterOrDigit() || ch == '_') ch.lowercaseChar() else '_' }.joinToString("")
+            s = s.map { ch -> if (ch in 'A'..'Z' || ch in 'a'..'z' || ch in '0'..'9' || ch == '_') ch.lowercaseChar() else '_' }.joinToString("")
                 .replace(Regex("_+"), "_")
                 .trim('_')
             if (s.isEmpty()) s = "app"
@@ -72,3 +72,4 @@ class AutoJs6ProjectTemplateService(private val project: Project) {
         }
     }
 }
+

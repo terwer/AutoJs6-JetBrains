@@ -1,9 +1,9 @@
 <idea-plugin>
     <id>org.autojs.autojs6.jetbrains</id>
     <name>AutoJs6</name>
-    <vendor email="support@autojs6.local">AutoJs6</vendor>
+    <vendor email="youweics@163.com">AutoJs6</vendor>
     <description><![CDATA[
-        AutoJs6 JetBrains MVP: connect to AutoJs6 devices, run/save/stop current scripts, and create AutoJs6 projects from the historical template.
+        AutoJs6 JetBrains: connect to AutoJs6 devices, run/save/stop current scripts, and create AutoJs6 projects from the historical template.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>

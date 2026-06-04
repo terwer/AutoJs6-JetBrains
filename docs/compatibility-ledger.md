@@ -16,7 +16,7 @@
 | IDE 监听 | VSCode 监听 `6347` | `AutoJs6ConnectionService.startListening` 默认 `6347` | 需要真实设备/重放连接 | MVP 无 |
 | IP 连接 | VSCode 连接到 AutoJs6 server `7347` | `AutoJs6ConnectionService.connectTo(host, 7347)` | 需要真实设备/重放连接 | MVP 无 |
 | Hello 握手 | VSCode 要求 AutoJs6 `6.7.0` / `3591`，并发送 extension hello | `AutoJs6Device.onJson`, `sendHello`, version rejection | 需要真实设备/重放连接 | MVP 无 |
-| ADB 连接 | VSCode 解析 `adb devices -l`，将本地 TCP 转发到 AutoJs6 server | `adb/AdbService.kt` 路径/PATH/Windows fallback、parser、forward | `MvpUnitTest.parsesAdbDevicesOutput`；端到端需要真实 ADB | Windows fallback 之外的跨平台 bundled ADB 打包 |
+| ADB 连接 | VSCode 解析 `adb devices -l`，将本地 TCP 转发到 AutoJs6 server | `adb/AdbService.kt` 路径/PATH/Windows fallback、parser、forward | `MvpUnitTest.parsesAdbDevicesOutput`；parser 已通过单元测试；端到端 ADB forward 已用 `emulator-5560` 验证，本地 `tcp:37047` 转发到设备 `tcp:7347` 并完成 AutoJs6 hello 握手 | Windows fallback 之外的跨平台 bundled ADB 打包 |
 | 运行/保存当前文件 | VSCode 从 editor 发送带 `id`、`name`、`script` 的 `run`/`save` | `RunCurrentFileAction`, `SaveCurrentFileAction` | 需要真实已连接设备/重放 | Run On Device 选择 |
 | Stop/stopAll | VSCode 发送带当前文件 `id` 的 `stop`，并广播 `stopAll` | `StopCurrentScriptAction`, `StopAllScriptsAction` | 需要真实已连接设备/重放 | rerun command |
 | 新项目模板 | VSCode 复制 `assets/template` 并替换占位符 | `resources/assets/template`, `AutoJs6ProjectTemplateService` | 包名规范化单元检查；生成项目检查 | 如果强制要求精确拼音，则完整拼音音译对齐需要验收 |
@@ -38,3 +38,6 @@
 - 不存在 HTTP server 代码或 `/exec` route。
 - Script commands 仅在 `connectedDevices()` 非空时调用 `sendCommand`；否则显示错误。
 - 连接失败和 ADB 不可用时报告错误，而不是进入 connected/success 状态。
+
+
+

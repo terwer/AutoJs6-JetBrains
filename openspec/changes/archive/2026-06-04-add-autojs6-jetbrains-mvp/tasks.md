@@ -52,12 +52,12 @@
 
 ## 7. Validation
 
-- [ ] 7.1 验证 AutoJs6 客户端模式连接 IDE 监听端口。
-- [ ] 7.2 验证 IDE 主动连接 AutoJs6 服务端 IP。
-- [ ] 7.3 验证 ADB 转发连接。
-- [ ] 7.4 验证 run/save/stop/stopAll 命令在设备侧生效。
+- [x] 7.1 验证 AutoJs6 客户端模式连接 IDE 监听端口。
+- [x] 7.2 验证 IDE 主动连接 AutoJs6 服务端 IP。
+- [x] 7.3 验证 ADB 转发连接。
+- [x] 7.4 验证 run/save/stop/stopAll 命令在设备侧生效。
 - [x] 7.5 验证新建项目模板内容正确。
-- [ ] 7.6 验证 IDE 关闭后 socket 不遗留。
+- [x] 7.6 验证 IDE 关闭后 socket 不遗留。
 
 ## 8. Deferred Work
 
@@ -65,4 +65,6 @@
 - [x] 8.2 后续提案：项目差量 zip 同步；MVP 不得用空 zip、全量误报、假 md5 或假成功替代真实 `bytes_command`。
 - [x] 8.3 后续提案：HTTP 远程命令入口；MVP 不得开放半成品 HTTP `/exec` 或未验证命令分发。
 - [x] 8.4 后续提案：用户自行发布文档、Marketplace/ZIP 发布步骤和 JetBrains 全家桶兼容验证；MVP 不得推测未验证 IDE 为已支持。
+
+
 

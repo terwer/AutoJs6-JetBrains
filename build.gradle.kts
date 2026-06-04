@@ -16,7 +16,6 @@ dependencies {
         create("IC", "2024.2")
         pluginVerifier()
         zipSigner()
-        instrumentationTools()
     }
     testImplementation(kotlin("test"))
 }

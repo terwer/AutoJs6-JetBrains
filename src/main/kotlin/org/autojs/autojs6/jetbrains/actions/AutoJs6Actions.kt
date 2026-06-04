@@ -20,7 +20,7 @@ class ViewDocumentAction : AnAction() {
 class ConnectAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
-        val choice = Messages.showChooseDialog(project, "选择 AutoJs6 连接方式", "AutoJs6 Connect", arrayOf("IDE 监听客户端连接", "通过 IP 连接服务端", "通过 ADB 连接"), "通过 IP 连接服务端", null)
+        val choice = Messages.showChooseDialog(project, "选择 AutoJs6 连接方式", "AutoJs6 Connect", null, arrayOf("IDE 监听客户端连接", "通过 IP 连接服务端", "通过 ADB 连接"), "通过 IP 连接服务端")
         when (choice) {
             0 -> { project.getService(AutoJs6ConnectionService::class.java).startListening(); AutoJs6Notifier.info(project, "AutoJs6 IDE 监听已启动: ${AutoJs6Constants.IDE_LISTENING_PORT}") }
             1 -> connectByIp(project)
@@ -37,7 +37,7 @@ class ConnectAction : AnAction() {
         val devices = adb.listDevices()
         if (devices.isEmpty()) return
         val names = devices.map { it.name }.toTypedArray()
-        val selected = Messages.showChooseDialog(project, "选择 ADB 设备", "AutoJs6 ADB Connect", names, names.first(), null)
+        val selected = Messages.showChooseDialog(project, "选择 ADB 设备", "AutoJs6 ADB Connect", null, names, names.first())
         if (selected >= 0) adb.connectViaAdb(devices[selected])
     }
 }
@@ -85,4 +85,5 @@ class NewProjectAction : AnAction() {
         AutoJs6ProjectTemplateService(project).chooseAndCreate()
     }
 }
+
 
