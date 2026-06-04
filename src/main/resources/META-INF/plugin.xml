@@ -1,0 +1,42 @@
+<idea-plugin>
+    <id>org.autojs.autojs6.jetbrains</id>
+    <name>AutoJs6</name>
+    <vendor email="support@autojs6.local">AutoJs6</vendor>
+    <description><![CDATA[
+        AutoJs6 JetBrains MVP: connect to AutoJs6 devices, run/save/stop current scripts, and create AutoJs6 projects from the historical template.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="AutoJs6 Notifications" displayType="BALLOON"/>
+    </extensions>
+
+    <actions>
+        <group id="AutoJs6.Group" text="AutoJs6" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="AutoJs6.ViewDocument" class="org.autojs.autojs6.jetbrains.actions.ViewDocumentAction" text="查看在线文档 (View Online Document)"/>
+            <action id="AutoJs6.Connect" class="org.autojs.autojs6.jetbrains.actions.ConnectAction" text="建立设备连接 (Connect)">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F6"/>
+            </action>
+            <action id="AutoJs6.DisconnectAll" class="org.autojs.autojs6.jetbrains.actions.DisconnectAllAction" text="断开所有连接 (Disconnect All)">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift F6"/>
+            </action>
+            <separator/>
+            <action id="AutoJs6.RunCurrentFile" class="org.autojs.autojs6.jetbrains.actions.RunCurrentFileAction" text="运行脚本 (Run)">
+                <keyboard-shortcut keymap="$default" first-keystroke="F6"/>
+            </action>
+            <action id="AutoJs6.SaveCurrentFile" class="org.autojs.autojs6.jetbrains.actions.SaveCurrentFileAction" text="保存到所有设备 (Save)"/>
+            <action id="AutoJs6.StopCurrentScript" class="org.autojs.autojs6.jetbrains.actions.StopCurrentScriptAction" text="停止当前脚本 (Stop)">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl F6"/>
+            </action>
+            <action id="AutoJs6.StopAllScripts" class="org.autojs.autojs6.jetbrains.actions.StopAllScriptsAction" text="停止所有脚本 (Stop All)">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift F6"/>
+            </action>
+            <separator/>
+            <action id="AutoJs6.NewProject" class="org.autojs.autojs6.jetbrains.actions.NewProjectAction" text="新建项目 (New Project)">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 6" second-keystroke="N"/>
+            </action>
+        </group>
+    </actions>
+</idea-plugin>
