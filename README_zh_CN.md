@@ -26,7 +26,7 @@
 <h1 align="center">AutoJs6 JetBrains 插件</h1>
 
 <p align="center">
-  <strong>AutoJs6</strong> 的 JetBrains IDE 插件 —— 在 IntelliJ IDEA / WebStorm / PyCharm 等全系列 JetBrains IDE 中连接 Android 设备，一键运行、保存、停止脚本，并快速创建 AutoJs6 项目模板。
+  <strong>AutoJs6</strong> 的 JetBrains IDE 插件。 在 IntelliJ IDEA / WebStorm / PyCharm 等全系列 JetBrains IDE 中连接 Android 设备，一键运行、保存、停止脚本，并快速创建 AutoJs6 项目模板。
 </p>
 
 <p align="center">

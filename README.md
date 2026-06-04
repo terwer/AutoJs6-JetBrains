@@ -26,7 +26,7 @@
 <h1 align="center">AutoJs6 JetBrains Plugin</h1>
 
 <p align="center">
-  A <strong>JetBrains IDE plugin</strong> for AutoJs6 — connect Android devices in IntelliJ IDEA, WebStorm, PyCharm, and the full JetBrains IDE family. Run, save, and stop scripts with one click, and scaffold AutoJs6 projects from a built-in template.
+  A <strong>JetBrains IDE plugin</strong> for AutoJs6.Connect Android devices in IntelliJ IDEA, WebStorm, PyCharm, and the full JetBrains IDE family. Run, save, and stop scripts with one click, and scaffold AutoJs6 projects from a built-in template.
 </p>
 
 <p align="center">
