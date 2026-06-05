@@ -42,6 +42,6 @@
 - [x] 7.1 单元测试：配置保存/读取 `scriptPath`。
 - [x] 7.2 单元测试：`.js` 文件校验通过，目录/非 JS/缺失文件校验失败。
 - [x] 7.3 协议回放测试：Run Configuration 发送 payload 与 Run Current File 一致。
-- [ ] 7.4 IDE 手工验证：`Run | Edit Configurations...` 可创建 `AutoJs6 Script`。
-- [ ] 7.5 IDE 手工验证：绿色 Run 按钮可运行已连接设备上的单个 JS 文件。
-- [ ] 7.6 IDE 手工验证：无设备时 Run Configuration 报错且不显示假成功。
+- [x] 7.4 IDE 手工验证：`Run | Edit Configurations...` 可创建 `AutoJs6 Script`。
+- [x] 7.5 IDE 手工验证：绿色 Run 按钮可运行已连接设备上的单个 JS 文件。
+- [x] 7.6 IDE 手工验证：无设备时 Run Configuration 报错且不显示假成功。

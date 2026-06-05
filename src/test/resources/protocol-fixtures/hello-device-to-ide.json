@@ -1,0 +1,16 @@
+{
+  "direction": "device-to-ide",
+  "frame": {
+    "type": 1,
+    "payload": {
+      "id": 1,
+      "type": "hello",
+      "data": {
+        "device_id": "fixture-device-1",
+        "device_name": "Fixture Device",
+        "app_version": "6.7.0",
+        "app_version_code": "3591"
+      }
+    }
+  }
+}

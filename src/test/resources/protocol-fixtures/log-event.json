@@ -1,0 +1,13 @@
+{
+  "direction": "device-to-ide",
+  "frame": {
+    "type": 1,
+    "payload": {
+      "id": 3,
+      "type": "log",
+      "data": {
+        "log": "I/AutoJs6: fixture log line"
+      }
+    }
+  }
+}

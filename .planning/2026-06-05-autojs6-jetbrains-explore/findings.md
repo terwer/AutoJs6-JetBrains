@@ -125,3 +125,10 @@
 - 反查本地 `gradle.jar`：Gradle 插件通过 registry key `gradle.compatibility.config.url` 下载兼容矩阵，`gradle.compatibility.update.interval` 控制更新；远程矩阵包含 Java 25/26，而 IC 2024.2 的 `JavaVersion.parse` 无法解析 `25`，所以报错。
 - 发现污染状态存放在 sandbox 的 `build/idea-sandbox/IC-2024.2/config/app-internal-state.db`，其中包含 `GradleJvmSupportMatrix.supportedJavaVersions` = `..."24","25","26"...`。
 - 处理策略：本项目 sandbox/headless 任务禁用该远程兼容矩阵更新，并删除已污染的 sandbox cache 文件；这不改变插件业务能力，只避免 JetBrains bundled Gradle 插件在本地测试时加载未来 JDK 矩阵。
+
+## 阶段 11 发现：parity 基线启动
+- `complete-autojs6-vscode-parity` 已进入 apply，第一批只做证据/矩阵/fixture，不实现缺失功能，避免 mock/fake。
+- VSCode parity 基线确认 18 个 command，其中当前 JetBrains 只覆盖基础文档/连接/断开/run/save/stop/stopAll/newProject 和单文件 Run Configuration；commandsHierarchy、指定设备 run/save、rerun、newUntitledFile、runProject/saveProject 等仍为 Missing/Partial，不能声明 full parity。
+- HTTP `/exec` 源行为是 `0.0.0.0:10347`，JetBrains 设计仍坚持默认 disabled 或 loopback-bound，wide binding 只能作为明确 compatibility mode。
+- 协议 fixtures 已覆盖 frame header、JSON/bytes type、hello、run command、log、bytes_command、device reverse command；其中 sample bytes 仅用于 replay framing，不代表项目同步完成。
+

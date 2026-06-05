@@ -150,6 +150,27 @@ class MvpUnitTest {
         }
     }
 
+
+    @Test fun protocolReplayFixturesAreValidJson() {
+        val dir = java.nio.file.Path.of("src/test/resources/protocol-fixtures")
+        assertTrue(Files.isDirectory(dir))
+        val jsonFiles = mutableListOf<java.nio.file.Path>()
+        Files.walk(dir).use { stream ->
+            stream
+                .filter { Files.isRegularFile(it) && it.fileName.toString().endsWith(".json") }
+                .forEach { jsonFiles.add(it) }
+        }
+        assertTrue(jsonFiles.size >= 8)
+        val names = jsonFiles.map { it.fileName.toString() }.toSet()
+        assertTrue(names.contains("manifest.json"))
+        assertTrue(names.contains("command-run-file.json"))
+        assertTrue(names.contains("bytes-frame.sample.json"))
+        assertTrue(names.contains("bytes-command-run-project.json"))
+        jsonFiles.forEach { fixture ->
+            JsonCodec.decode(Files.readString(fixture).toByteArray())
+        }
+    }
+
     @Test fun deviceHandshakeAndScriptCommandsUseRealFrames() {
         val server = ServerSocket(0)
         val attached = CountDownLatch(1)

@@ -254,3 +254,27 @@
   - 使用 JetBrains IDE build_project 对 `D:\Users\Administrator\Documents\myproject\AutoJs6-JetBrains` 执行构建验证。
 - 验证结果：
   - `build_project`：通过，`problems=[]`。
+
+### 阶段 11：complete-autojs6-vscode-parity 基线任务启动
+- **状态：** complete
+- 执行的操作：
+  - 使用 OpenSpec apply 流程读取 `complete-autojs6-vscode-parity` 的 proposal、design、tasks 和 specs。
+  - 新增 `docs/vscode-parity-matrix.md`，从 VSCode `package.json` 建立 18 个 command 的 parity matrix，并记录 HTTP/keymap/Run Configuration/New Project accepted differences。
+  - 扩展 `docs/compatibility-ledger.md`，加入 full-parity 四规则、compatibility ledger 要求和 no-mock gate。
+  - 新增 `src/test/resources/protocol-fixtures/` 协议 replay fixtures，覆盖 JSON frame、bytes frame、hello、command、log、bytes_command、device reverse command。
+  - 新增 `protocolReplayFixturesAreValidJson` 测试，第一次编译因 Kotlin Stream lambda 中 `jsonFiles += it` 失败，改为 `jsonFiles.add(it)` 后通过。
+  - 勾选 `openspec/changes/complete-autojs6-vscode-parity/tasks.md` 中 0.1～1.4。
+- 创建/修改的文件：
+  - `docs/vscode-parity-matrix.md`
+  - `docs/compatibility-ledger.md`
+  - `src/test/resources/protocol-fixtures/README.md`
+  - `src/test/resources/protocol-fixtures/*.json`
+  - `src/test/kotlin/org/autojs/autojs6/jetbrains/MvpUnitTest.kt`
+  - `openspec/changes/complete-autojs6-vscode-parity/tasks.md`
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/task_plan.md`
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/progress.md`
+- 验证结果：
+  - `openspec validate complete-autojs6-vscode-parity --strict`：通过。
+  - `openspec validate add-autojs6-script-run-configuration --strict`：通过。
+  - `./gradlew.bat --no-daemon --console=plain test`：通过。
+

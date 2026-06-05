@@ -108,3 +108,13 @@
 - [x] 运行相关测试/构建验证
 - [x] 记录修复证据和剩余风险
 - **状态：** complete
+
+### 阶段 11：启动 complete-autojs6-vscode-parity 基线任务
+- [x] 读取 parity change 的 proposal、design、tasks 和 7 个 capability specs
+- [x] 建立 `docs/vscode-parity-matrix.md`，覆盖 18 个 VSCode commands、breakpoint row、JetBrains action 映射、accepted differences 和 release-blocking gate
+- [x] 扩展 `docs/compatibility-ledger.md`，加入 full-parity 四规则、compatibility ledger 要求和 no-mock completion gate
+- [x] 建立 `src/test/resources/protocol-fixtures/`，覆盖 JSON frame、bytes frame、hello、command、log、bytes_command 和 device reverse command
+- [x] 增加 `protocolReplayFixturesAreValidJson` 单元测试并执行 `./gradlew.bat --no-daemon --console=plain test` 通过
+- [x] 勾选 `complete-autojs6-vscode-parity` 任务 0.1～1.4
+- **状态：** complete
+

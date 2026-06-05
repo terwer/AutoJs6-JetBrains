@@ -1,0 +1,13 @@
+{
+  "direction": "ide-to-device",
+  "frame": {
+    "type": 1,
+    "payload": {
+      "id": 1,
+      "type": "hello",
+      "data": {
+        "extensionVersion": "1.0.13"
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "direction": "ide-to-device",
+  "frame": {
+    "type": 2,
+    "payloadBase64": "QXV0b0pzNiBwcm9qZWN0IHppcCBmaXh0dXJlCg==",
+    "payloadDescription": "Placeholder bytes fixture used to test TYPE_BYTES framing; not a fake project-sync success."
+  },
+  "md5": "f9a0740957bc66075c5a0ffcbeba9404"
+}

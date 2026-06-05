@@ -1,12 +1,12 @@
 ## 1. Parity 基线与矩阵
 
-- [ ] 0.1 确认并发布四条不可妥协规则：runtime/protocol compatibility plus built-in-template project scaffolding、保留用户习惯并采用 JetBrains best practices、additive feature policy，以及 no mock/fake/speculation。
-- [ ] 0.2 增加 compatibility ledger，要求每个已声明的 command、protocol、project-sync、connection、UI 和 release 行为都有证据。
-- [ ] 0.3 增加 no-mock gate：如果任务依赖静态数据、fake success、未实现 placeholder、猜测的 protocol fields、未验证 publishing steps 或未验证 IDE compatibility claims，则不能标记为完成。
-- [ ] 1.1 从 `package.json` commands、menus、keybindings 和 breakpoints 建立 VSCode parity matrix。
-- [ ] 1.2 将每个 VSCode command 映射到 JetBrains Action id、UI location、shortcut recommendation 和 verification step。
-- [ ] 1.3 记录 VSCode 行为与更安全 JetBrains 行为之间被接受的差异，尤其是 HTTP binding；差异必须有明确 compatibility-mode fallback 或已记录的用户批准例外。
-- [ ] 1.4 准备 protocol replay fixtures，覆盖 JSON frame、bytes frame、hello、command、log 和 bytes_command payload。
+- [x] 0.1 确认并发布四条不可妥协规则：runtime/protocol compatibility plus built-in-template project scaffolding、保留用户习惯并采用 JetBrains best practices、additive feature policy，以及 no mock/fake/speculation。
+- [x] 0.2 增加 compatibility ledger，要求每个已声明的 command、protocol、project-sync、connection、UI 和 release 行为都有证据。
+- [x] 0.3 增加 no-mock gate：如果任务依赖静态数据、fake success、未实现 placeholder、猜测的 protocol fields、未验证 publishing steps 或未验证 IDE compatibility claims，则不能标记为完成。
+- [x] 1.1 从 `package.json` commands、menus、keybindings 和 breakpoints 建立 VSCode parity matrix。
+- [x] 1.2 将每个 VSCode command 映射到 JetBrains Action id、UI location、shortcut recommendation 和 verification step。
+- [x] 1.3 记录 VSCode 行为与更安全 JetBrains 行为之间被接受的差异，尤其是 HTTP binding；差异必须有明确 compatibility-mode fallback 或已记录的用户批准例外。
+- [x] 1.4 准备 protocol replay fixtures，覆盖 JSON frame、bytes frame、hello、command、log 和 bytes_command payload。
 
 ## 2. Action 与上下文入口 Parity
 

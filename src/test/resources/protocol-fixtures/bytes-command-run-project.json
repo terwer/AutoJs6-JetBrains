@@ -1,0 +1,20 @@
+{
+  "direction": "ide-to-device",
+  "requiresPreviousFrame": "bytes-frame.sample.json",
+  "frame": {
+    "type": 1,
+    "payload": {
+      "type": "bytes_command",
+      "md5": "f9a0740957bc66075c5a0ffcbeba9404",
+      "data": {
+        "id": "C:/fixture/AutoJs6Project",
+        "name": "C:/fixture/AutoJs6Project",
+        "deletedFiles": [
+          "old.js"
+        ],
+        "override": false,
+        "command": "run_project"
+      }
+    }
+  }
+}

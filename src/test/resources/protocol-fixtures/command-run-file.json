@@ -1,0 +1,16 @@
+{
+  "direction": "ide-to-device",
+  "frame": {
+    "type": 1,
+    "payload": {
+      "id": 2,
+      "type": "command",
+      "data": {
+        "command": "run",
+        "id": "C:/fixture/main.js",
+        "name": "main.js",
+        "script": "toast('fixture run')"
+      }
+    }
+  }
+}

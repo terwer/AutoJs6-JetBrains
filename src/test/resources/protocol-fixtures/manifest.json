@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "sourceEvidence": [
+    "AutoJs6-VSCode-Extension/src/device.ts: HEADER_SIZE=8, TYPE_JSON=1, TYPE_BYTES=2, sendJson, sendBytes, sendCommand",
+    "AutoJs6-VSCode-Extension/src/device.ts: Devices.sendProjectCommand sends bytes before JSON bytes_command",
+    "AutoJs6-VSCode-Extension/src/extension.ts: AJHttpServer /exec and Extension.commands",
+    "AutoJs6-VSCode-Extension/src/project.ts + src/diff.ts: project.json, ignore, mtime diff, zip, md5"
+  ],
+  "frameHeader": {
+    "sizeBytes": 8,
+    "lengthEncoding": "int32BE",
+    "typeEncoding": "int32BE",
+    "jsonType": 1,
+    "bytesType": 2,
+    "maxFrameSizeBytes": 67108864
+  },
+  "requiredClientVersion": {
+    "name": "6.7.0",
+    "code": 3591
+  },
+  "fixtures": [
+    "hello-device-to-ide.json",
+    "hello-ide-to-device.json",
+    "command-run-file.json",
+    "log-event.json",
+    "bytes-frame.sample.json",
+    "bytes-command-run-project.json",
+    "bytes-command-save-project.json",
+    "device-reverse-command-rerun.json"
+  ]
+}

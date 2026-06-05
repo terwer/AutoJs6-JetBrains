@@ -42,5 +42,46 @@
 - Script commands 仅在 `connectedDevices()` 非空时调用 `sendCommand`；否则显示错误。
 - 连接失败和 ADB 不可用时报告错误，而不是进入 connected/success 状态。
 
+## Full-parity 基线门禁（complete-autojs6-vscode-parity）
 
+本节把 MVP 台账提升为 full-parity 实施门禁。完整矩阵见 `docs/vscode-parity-matrix.md`。
+
+### 四条不可妥协规则（发布口径）
+
+1. **runtime/protocol compatibility plus built-in-template project scaffolding**：已实现流程必须保持 AutoJs6 runtime/protocol 兼容；新建项目只从插件内置模板创建全新项目，不要求 existing project 做格式迁移。
+2. **保留用户习惯并采用 JetBrains best practices**：VSCode 用户熟悉的命令、快捷键意图、连接选项、项目上下文操作、run/save/stop 心智模型必须可找到；承载方式使用 JetBrains Action、Tool Window、Settings、Background Task、Notification、Disposer 等平台实践。
+3. **Additive feature policy**：JetBrains-native Tool Window、诊断、Action Search、安全 HTTP 控制和发布文档只能是增强，不能替代、移除或静默削弱 VSCode parity 行为。
+4. **No mock/fake/speculation**：没有真实实现和证据的能力必须保持 Missing、Deferred、Blocked 或 Requires verification；禁止用静态设备、fake success、空 zip、假 md5、猜测字段、未验证发布步骤或未验证 IDE 兼容声明冒充完成。
+
+### Compatibility ledger 要求
+
+每个已声明能力必须至少记录以下证据之一：
+
+| 能力类别 | 必须记录的证据 |
+|---|---|
+| command/action | VSCode command id、JetBrains action id、UI placement、快捷键建议、可调用验证。 |
+| protocol | frame type、payload 字段、源代码证据、fixture/replay 或实机验证。 |
+| project sync | project detection、ignore、mtime diff、zip relative paths、md5、deletedFiles、override、bytes ordering、run_project/save_project 验证。 |
+| connection | LAN/client/server/ADB/forward/handshake/timeout/duplicate/error 证据。 |
+| UI | Tool Window、Notifications、Output/Console、Status state 与 dispose/cleanup 证据。 |
+| release | JetBrains IDE family/version matrix、Plugin Verifier/手工验证、sign/upload/rollback 文档证据。 |
+
+### No-mock completion gate
+
+任务勾选前必须满足：
+
+- 没有 fake success、空实现、占位 UI、静态设备列表或未连接仍成功的路径。
+- 没有未验证的 protocol field、HTTP command、ADB provider 行为、IDE family 支持或 Marketplace 发布步骤。
+- 没有用 Run Configuration、Tool Window 或诊断 helper 替代必需 VSCode command row。
+- 如果只能静态审查，任务状态必须写明 `requires manual/device verification`，不能标记为 full parity 完成。
+
+### 当前 full-parity 快照
+
+| 区域 | 当前状态 | 下一步 |
+|---|---|---|
+| 18 个 VSCode commands | 见 `docs/vscode-parity-matrix.md`；MVP 已覆盖部分基础 action，其余 Missing/Partial | 先补 action id、上下文入口和 keymap metadata。 |
+| 协议 replay fixtures | 已建立 `src/test/resources/protocol-fixtures/` 基线 | 后续将 fixtures 接入 frame codec/project/http 单元测试。 |
+| 项目同步 | Missing；不得报告项目同步成功 | 实现 project detection/diff/zip/md5/bytes_command 后再更新台账。 |
+| HTTP bridge | Missing；默认不暴露端口 | 实现 settings + safe default + compatibility mode 后再验证。 |
+| JetBrains 全家桶发布 | 未验证；不得声明完整支持 | release 阶段维护 IDE/version matrix 和 exception matrix。 |
 

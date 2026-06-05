@@ -1,0 +1,14 @@
+{
+  "direction": "device-to-ide",
+  "frame": {
+    "type": 1,
+    "payload": {
+      "id": 4,
+      "type": "command",
+      "data": {
+        " cmd ": "rerun",
+        "path": "C:/fixture/main.js"
+      }
+    }
+  }
+}
