@@ -169,3 +169,88 @@
 - 测试结果：
   - `openspec validate add-autojs6-jetbrains-mvp`：通过。
   - `openspec validate complete-autojs6-vscode-parity`：通过。
+
+### 阶段 10：测试失败修复启动
+- **状态：** in_progress
+- 执行的操作：
+  - 恢复活跃规划上下文。
+  - 新增阶段 10，用于处理 `docs/error.txt` 中记录的测试失败。
+- 创建/修改的文件：
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/task_plan.md`
+  - `.planning/2026-06-05-autojs6-jetbrains-explore/progress.md`
+
+### 阶段 10 增量：读取失败日志
+- **状态：** in_progress
+- 执行的操作：
+  - 读取 `docs/error.txt`。
+  - 识别到与本插件直接相关的异常：`ConfigurationTypeUtil.findConfigurationType` 找不到 `AutoJs6ScriptConfigurationType`，触发点在 run configuration producer。
+- 发现已写入 `findings.md`。
+
+### 阶段 10 增量：定位注册点根因
+- **状态：** in_progress
+- 执行的操作：
+  - 检查 `plugin.xml`、run configuration type 与 producer 源码。
+  - 搜索本地 IntelliJ 2024.2 bundled 插件描述符，确认运行配置类型扩展点标签应为 `configurationType`。
+- 结论：准备将 `runConfigurationType` 改为 `configurationType`，保留 `runConfigurationProducer`。
+
+### 阶段 10 增量：最小修复已编辑
+- **状态：** in_progress
+- 执行的操作：
+  - 将 `src/main/resources/META-INF/plugin.xml` 中的 run configuration type 注册标签从 `runConfigurationType` 改为 IntelliJ Platform 使用的 `configurationType`。
+  - 在 `src/test/kotlin/org/autojs/autojs6/jetbrains/MvpUnitTest.kt` 添加回归测试，校验 `plugin.xml` 使用正确扩展点且仍注册 producer。
+- 创建/修改的文件：
+  - `src/main/resources/META-INF/plugin.xml`
+  - `src/test/kotlin/org/autojs/autojs6/jetbrains/MvpUnitTest.kt`
+
+### 阶段 10 增量：清理验证配置警告
+- **状态：** in_progress
+- 执行的操作：
+  - `test` 第二次使用 `--no-daemon --console=plain --rerun-tasks` 成功通过。
+  - `verifyPluginProjectConfiguration` 暴露两项配置警告：`IC 2024.2` 需要 Java 21 sourceCompatibility；Kotlin stdlib 默认依赖可能与 IDE 自带版本冲突。
+  - 将 `build.gradle.kts` 的 Kotlin toolchain 从 17 调整为 21。
+  - 在 `gradle.properties` 增加 `kotlin.stdlib.default.dependency=false`。
+- 创建/修改的文件：
+  - `build.gradle.kts`
+  - `gradle.properties`
+
+### 阶段 10 增量：处理 GradleJvmSupportMatrix sandbox 污染
+- **状态：** in_progress
+- 执行的操作：
+  - 反查本地 IntelliJ `gradle.jar`，确认 Gradle 兼容矩阵由 registry key `gradle.compatibility.config.url` / `gradle.compatibility.update.interval` 控制。
+  - 在 `build.gradle.kts` 中给 `runIde` 与 `buildSearchableOptions` JavaExec 任务设置：`gradle.compatibility.config.url=`、`gradle.compatibility.update.interval=0`。
+  - 删除已污染的 sandbox cache：`build/idea-sandbox/IC-2024.2/config/app-internal-state.db`（删除前验证路径在工作区内）。
+- 创建/修改的文件：
+  - `build.gradle.kts`
+- 清理的生成物：
+  - `build/idea-sandbox/IC-2024.2/config/app-internal-state.db`
+
+### 阶段 10 完成：测试与打包验证通过
+- **状态：** complete
+- 修复摘要：
+  - `AutoJs6ScriptConfigurationType` 注册标签改为 `configurationType`，解决 `ConfigurationTypeUtil.findConfigurationType` 找不到类型导致的 AutoJs6 blame 异常。
+  - 添加 `pluginXmlRegistersRunConfigurationTypeWithPlatformExtensionPoint` 回归测试。
+  - 构建配置调整为 IntelliJ 2024.2 要求的 Java 21 toolchain，并禁用 Kotlin stdlib 默认依赖，消除 `verifyPluginProjectConfiguration` 的项目配置警告。
+  - 禁用 sandbox/headless Gradle compatibility 远程矩阵更新，清理已污染的 `app-internal-state.db`；禁用 searchable options 生成，避免无配置页插件触发 IDE headless KeymapManager 严重日志。
+- 验证结果：
+  - `./gradlew.bat --no-daemon --console=plain test --rerun-tasks`：通过。
+  - `./gradlew.bat --no-daemon --console=plain buildPlugin`：通过，`buildSearchableOptions SKIPPED`。
+  - `./gradlew.bat --no-daemon --console=plain test`：通过/UP-TO-DATE。
+  - `./gradlew.bat --no-daemon --console=plain check`：通过。
+- 仍有非阻断提示：
+  - IntelliJ platform 解包阶段输出 `emojipicker.jar` classPath 警告。
+  - Gradle 9.3 输出 Gradle 10 兼容性弃用提示。
+  - `AutoJs6Actions.kt` 使用已 deprecated 的 `Messages.showChooseDialog`，当前只是编译警告，未阻塞本轮测试。
+
+### 阶段 10 补充验证
+- **状态：** complete
+- 执行的操作：
+  - 验证 sandbox 插件 jar：`build/idea-sandbox/IC-2024.2/plugins/AutoJs6-JetBrains/lib/AutoJs6-JetBrains-0.1.0.jar` 内的 `META-INF/plugin.xml` 已包含 `configurationType` 与 `runConfigurationProducer`。
+  - 第一次直接查 `build/idea-sandbox/IC-2024.2/plugins/AutoJs6-JetBrains/META-INF/plugin.xml` 失败，因为 sandbox 中插件描述符被打入 `lib/*.jar`，不是展开在插件根目录；随后改为检查 jar 内容。
+  - `git diff --check` 第一次发现规划文件 EOF 多余空行；已修正后复跑通过（仅剩 CRLF 提示）。
+
+### 阶段 10 IDE 构建验证
+- **状态：** complete
+- 执行的操作：
+  - 使用 JetBrains IDE build_project 对 `D:\Users\Administrator\Documents\myproject\AutoJs6-JetBrains` 执行构建验证。
+- 验证结果：
+  - `build_project`：通过，`problems=[]`。

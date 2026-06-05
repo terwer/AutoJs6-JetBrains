@@ -100,3 +100,11 @@
 - [x] 执行 `openspec validate add-autojs6-jetbrains-mvp` 通过
 - [x] 执行 `openspec validate complete-autojs6-vscode-parity` 通过
 - **状态：** complete
+
+### 阶段 10：修复当前测试失败
+- [x] 读取 `docs/error.txt`，定位失败测试、命令和堆栈
+- [x] 追踪相关源码/测试，确认真实运行路径
+- [x] 做最小可审查修复，避免 mock/fake
+- [x] 运行相关测试/构建验证
+- [x] 记录修复证据和剩余风险
+- **状态：** complete

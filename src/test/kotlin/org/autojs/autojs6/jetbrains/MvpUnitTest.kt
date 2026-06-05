@@ -58,6 +58,14 @@ class MvpUnitTest {
         assertEquals("", AutoJs6ScriptConfigurationSerializer.readScriptPath(element))
     }
 
+    @Test fun pluginXmlRegistersRunConfigurationTypeWithPlatformExtensionPoint() {
+        val pluginXml = Files.readString(java.nio.file.Path.of("src/main/resources/META-INF/plugin.xml"))
+
+        assertTrue(pluginXml.contains("<configurationType implementation=\"org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationType\"/>"))
+        assertFalse(pluginXml.contains("<runConfigurationType"))
+        assertTrue(pluginXml.contains("<runConfigurationProducer implementation=\"org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationProducer\"/>"))
+    }
+
     @Test fun autoJs6ScriptValidationAcceptsOnlyLocalJsFiles() {
         val dir = Files.createTempDirectory("autojs6-script-validation")
         try {

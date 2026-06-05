@@ -108,3 +108,20 @@
 - OpenSpec 正文现在只保留三个明确目标：VSCode 扩展全量功能对齐、用户自行发布文档、JetBrains 全家桶兼容。
 - 任何 JetBrains-native helper 只允许作为真实 parity 能力的展示、诊断或安全增强，不能替代 VSCode parity。
 - 关键词扫描已确认没有残留会导致后续实现误解的历史范围词。
+
+## 阶段 10 发现：`docs/error.txt` 初读
+- `runIde` 日志中有两个显著问题：
+  1. Bundled Gradle 插件初始化 `GradleJvmSupportMatrix` 时报 `IllegalArgumentException: 25`，栈在 `org.jetbrains.plugins.gradle.jvmcompat`，初步判断像是 IDE/Gradle 插件读取到不兼容 Java 25 版本矩阵数据，需与本插件错误分开验证。
+  2. 更直接由本插件触发的错误：`ActionUpdater` 报 `Plugin to blame: AutoJs6 version: 0.1.0`，`ConfigurationTypeUtil.findConfigurationType(...)` 找不到 `org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationType`，调用点是 `AutoJs6ScriptConfigurationType.Companion.getInstance()` → `AutoJs6ScriptConfigurationProducer.getConfigurationFactory()`。
+- 当前优先追踪本插件 Run Configuration Type 是否已在 `plugin.xml` 正确注册，以及 producer 是否在类型注册前/错误扩展点中被调用。
+
+## 阶段 10 发现：Run Configuration 注册点定位
+- 本项目 `src/main/resources/META-INF/plugin.xml` 当前使用 `<runConfigurationType implementation="...AutoJs6ScriptConfigurationType"/>`。
+- 本地 IntelliJ 2024.2 bundled 插件描述符证据显示 Gradle/Groovy 等运行配置类型使用 `<configurationType implementation="..."/>`，而 producer 使用 `<runConfigurationProducer implementation="..."/>`。
+- 因此 `ConfigurationTypeUtil.findConfigurationType(AutoJs6ScriptConfigurationType::class.java)` 找不到类型的根因，优先判断为 `plugin.xml` 扩展点标签写错：IDE 未把 AutoJs6 类型注册进 `ConfigurationType.CONFIGURATION_TYPE_EP`。
+
+## 阶段 10 发现：GradleJvmSupportMatrix 严重日志来源
+- 修复 AutoJs6 run configuration 注册后，`buildPlugin` 已成功，但 headless IDE 的 `buildSearchableOptions` 仍会输出 `GradleJvmSupportMatrix` / `IllegalArgumentException: 25`。
+- 反查本地 `gradle.jar`：Gradle 插件通过 registry key `gradle.compatibility.config.url` 下载兼容矩阵，`gradle.compatibility.update.interval` 控制更新；远程矩阵包含 Java 25/26，而 IC 2024.2 的 `JavaVersion.parse` 无法解析 `25`，所以报错。
+- 发现污染状态存放在 sandbox 的 `build/idea-sandbox/IC-2024.2/config/app-internal-state.db`，其中包含 `GradleJvmSupportMatrix.supportedJavaVersions` = `..."24","25","26"...`。
+- 处理策略：本项目 sandbox/headless 任务禁用该远程兼容矩阵更新，并删除已污染的 sandbox cache 文件；这不改变插件业务能力，只避免 JetBrains bundled Gradle 插件在本地测试时加载未来 JDK 矩阵。

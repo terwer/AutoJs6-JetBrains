@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.JavaExec
+
 plugins {
     id("org.jetbrains.intellij.platform") version "2.2.1"
     kotlin("jvm") version "2.0.21"
@@ -20,12 +22,21 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-kotlin { jvmToolchain(17) }
+intellijPlatform {
+    buildSearchableOptions.set(false)
+}
+
+kotlin { jvmToolchain(21) }
 
 tasks {
     patchPluginXml {
         sinceBuild.set("242")
     }
+    withType<JavaExec>().configureEach {
+        if (name == "runIde" || name == "buildSearchableOptions") {
+            systemProperty("gradle.compatibility.config.url", "")
+            systemProperty("gradle.compatibility.update.interval", "0")
+        }
+    }
     test { useJUnitPlatform() }
 }
-
