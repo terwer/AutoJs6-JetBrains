@@ -41,6 +41,7 @@
 |---|---|
 | 🔌 **多模式连接** | IDE 监听（端口 `6347`）、IP 直连（端口 `7347`）、ADB 连接 —— 三种方式连接 AutoJs6 设备 |
 | ▶️ **运行脚本** | 快捷键一键将当前编辑的脚本发送到所有已连接设备运行 |
+| ▶️ **AutoJs6 Script 运行配置** | 通过 JetBrains Run Configuration、绿色运行按钮、最近运行记录和 <kbd>Shift</kbd> + <kbd>F10</kbd> 保存并重复运行一个本地 `.js` 文件 |
 | 💾 **保存到设备** | 将当前脚本推送到所有已连接设备 |
 | ⏹️ **停止脚本** | 停止当前脚本或一键停止所有运行中的脚本 |
 | 📁 **项目模板** | 基于内置历史模板快速创建 AutoJs6 项目 |
@@ -82,6 +83,15 @@ cd AutoJs6-JetBrains
 1. 在编辑器中打开任意 `.js` 文件
 2. 按下 <kbd>F6</kbd> —— 脚本即刻在所有已连接设备上运行
 
+### 运行已保存的脚本配置
+
+1. 打开 **Run → Edit Configurations...**
+2. 新增 **AutoJs6 Script**
+3. 选择一个本地 `.js` 文件
+4. 通过绿色运行按钮、最近运行记录或 <kbd>Shift</kbd> + <kbd>F10</kbd> 运行
+
+`AutoJs6 Script` 仅支持单文件。项目 Run Configuration、Run Project、Save Project、项目 zip、md5 与 `bytes_command` 均已明确延后，需等待项目同步/项目运行协议实现并验证后另行提案。本插件不会注册或伪造 `AutoJs6 Project` Run Configuration。
+
 ## ⌨️ 快捷键
 
 | 操作 | 快捷键 |
@@ -100,7 +110,9 @@ org.autojs.autojs6.jetbrains
 ├── actions    # IDE Actions — 所有用户命令的 UI 入口
 ├── adb        # ADB 集成 — 设备发现与端口转发
 ├── device     # 核心网络层 — Socket 连接与二进制协议
-└── project    # 项目脚手架 — 基于模板的项目创建
+├── project    # 项目脚手架 — 基于模板的项目创建
+├── run        # JetBrains 单文件 AutoJs6 Script 运行配置
+└── script     # 单文件命令 payload 与校验共享逻辑
 ```
 
 ### 通信协议

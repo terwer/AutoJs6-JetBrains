@@ -147,11 +147,14 @@ class AutoJs6ConnectionService : Disposable {
         }
     }
 
-    fun sendCommand(command: String, data: Map<String, Any?> = emptyMap()): Boolean {
+    fun sendCommand(command: String, data: Map<String, Any?> = emptyMap()): Boolean =
+        sendCommandToConnectedDevices(command, data) > 0
+
+    fun sendCommandToConnectedDevices(command: String, data: Map<String, Any?> = emptyMap()): Int {
         val current = connectedDevices()
-        if (current.isEmpty()) return false
+        if (current.isEmpty()) return 0
         current.forEach { it.sendCommand(command, data) }
-        return true
+        return current.size
     }
 
     fun disconnectAll(project: Project? = null) {

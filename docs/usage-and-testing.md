@@ -61,6 +61,7 @@ MVP Action：
 | Stop All Scripts | `Ctrl + Shift + F6` |
 | Connect | `Ctrl + Alt + F6` |
 | Disconnect All | `Ctrl + Alt + Shift + F6` |
+| Rerun selected Run Configuration | `Shift + F10` |
 
 ## 3. 连接方式
 
@@ -253,7 +254,52 @@ Tools → AutoJs6 → 停止所有脚本
 
 无连接设备时，这些命令会报错，不会显示假成功。
 
-## 7. 验证新建项目
+## 7. 单文件 Run Configuration
+
+本变更新增的 JetBrains 原生运行配置只覆盖单个本地 `.js` 文件：
+
+```text
+Run → Edit Configurations...
+→ Add New Configuration
+→ AutoJs6 Script
+→ Script .js file 选择本地 .js 文件
+```
+
+也可以在当前编辑器或 Project View 选中本地 `.js` 文件时，通过 JetBrains 的运行配置创建入口生成 `AutoJs6 Script` 配置。
+
+运行方式：
+
+```text
+绿色 Run 按钮
+最近运行记录
+Shift + F10
+```
+
+执行时插件读取配置中的文件路径、文件名和文本内容，并向所有已连接 AutoJs6 设备发送单文件 payload：
+
+```json
+{
+  "command": "run",
+  "id": "<本地脚本绝对路径>",
+  "name": "<文件名.js>",
+  "script": "<文件文本>"
+}
+```
+
+失败边界：
+
+- 未连接设备：报错，不发送命令，不显示假成功。
+- 文件不存在、目录、非本地文件或非 `.js` 文件：配置校验失败，不发送命令。
+- 文件不可读取：运行失败并提示，不发送命令。
+
+项目运行边界：
+
+- 当前不注册 `AutoJs6 Project` Run Configuration。
+- 当前不实现 Run Project / Save Project。
+- 当前不生成项目 zip、md5，也不发送 `bytes_command`。
+- 项目 Run Configuration 需等待项目同步/项目运行协议实现并验证后另行提案。
+
+## 8. 验证新建项目
 
 执行：
 
@@ -284,9 +330,9 @@ main.js
 }
 ```
 
-## 8. 常见问题
+## 9. 常见问题
 
-### 8.1 `emulator-5560` 与 `127.0.0.1:5561`
+### 9.1 `emulator-5560` 与 `127.0.0.1:5561`
 
 `5560` 通常是 emulator console 端口，`5561` 是对应 ADB TCP 端口。若 ADB 已识别出 `emulator-5560`，优先选择 `emulator-5560`。
 
@@ -296,7 +342,7 @@ main.js
 adb disconnect 127.0.0.1:5561
 ```
 
-### 8.2 ADB 显示 offline
+### 9.2 ADB 显示 offline
 
 ```powershell
 adb kill-server
@@ -306,7 +352,7 @@ adb devices -l
 
 如果仍是 `offline`，重启模拟器或重新打开 USB 调试。
 
-### 8.3 连接成功但运行无反应
+### 9.3 连接成功但运行无反应
 
 检查：
 
@@ -316,7 +362,7 @@ adb devices -l
 4. AutoJs6 版本是否不低于 `6.7.0 / 3591`。
 5. 是否选择了重复 ADB serial；优先选择 `emulator-5560`。
 
-## 9. 推荐验收顺序
+## 10. 推荐验收顺序
 
 ```text
 1. .\gradlew.bat test buildPlugin --no-daemon
@@ -327,10 +373,11 @@ adb devices -l
 6. 打开 main.js，按 F6
 7. 验证 toast 或脚本行为
 8. 验证 Save / Stop / Stop All
-9. 验证 New Project 生成 project.json
+9. 验证 AutoJs6 Script Run Configuration 可创建并运行单个 .js 文件
+10. 验证 New Project 生成 project.json
 ```
 
-## 10. 归档说明
+## 11. 归档说明
 
 `openspec archive` 只表示需求变更已完成并同步 specs，不会自动安装插件。
 
@@ -345,4 +392,3 @@ adb devices -l
 ```text
 build/distributions/AutoJs6-JetBrains-0.1.0.zip
 ```
-

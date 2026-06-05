@@ -13,6 +13,7 @@ import org.autojs.autojs6.jetbrains.AutoJs6Notifier
 import org.autojs.autojs6.jetbrains.adb.AdbService
 import org.autojs.autojs6.jetbrains.device.AutoJs6ConnectionService
 import org.autojs.autojs6.jetbrains.project.AutoJs6ProjectTemplateService
+import org.autojs.autojs6.jetbrains.script.AutoJs6ScriptCommand
 
 class ViewDocumentAction : AnAction() {
     override fun actionPerformed(e: AnActionEvent) { BrowserUtil.browse(AutoJs6Constants.DOC_URL) }
@@ -60,7 +61,7 @@ abstract class CurrentFileCommandAction(private val command: String) : AnAction(
         val doc = editor?.document ?: return noFile(project)
         val vf = FileDocumentManager.getInstance().getFile(doc) ?: e.getData(CommonDataKeys.VIRTUAL_FILE) ?: return noFile(project)
         if (!vf.isInLocalFileSystem) return noFile(project)
-        return mapOf("id" to vf.path, "name" to vf.name, "script" to doc.text)
+        return AutoJs6ScriptCommand.createSingleFilePayload(vf, doc.text).toCommandData()
     }
 
     private fun noFile(project: Project): Map<String, Any?>? { AutoJs6Notifier.error(project, "需在正在编辑的本地文件窗口中使用该命令"); return null }

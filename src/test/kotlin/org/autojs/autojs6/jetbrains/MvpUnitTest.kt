@@ -5,11 +5,16 @@ import org.autojs.autojs6.jetbrains.device.AutoJs6Frame
 import org.autojs.autojs6.jetbrains.device.FrameCodec
 import org.autojs.autojs6.jetbrains.device.JsonCodec
 import org.autojs.autojs6.jetbrains.project.AutoJs6ProjectTemplateService
+import org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationSerializer
+import org.autojs.autojs6.jetbrains.script.AutoJs6ScriptCommand
+import org.jdom.Element
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import java.net.ServerSocket
 import java.net.Socket
+import java.nio.file.Files
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 class MvpUnitTest {
@@ -42,6 +47,101 @@ class MvpUnitTest {
         assertEquals("app_123_foo", AutoJs6ProjectTemplateService.normalizePackageSuffix("123 Foo!"))
         assertTrue(AutoJs6ProjectTemplateService.normalizePackageSuffix("中文项目").matches(Regex("[a-z_][a-z0-9_]*")))
     }
+
+    @Test fun autoJs6ScriptConfigurationPersistsScriptPath() {
+        val element = Element("configuration")
+        val scriptPath = "/tmp/autojs6/main.js"
+        AutoJs6ScriptConfigurationSerializer.writeScriptPath(element, scriptPath)
+        assertEquals(scriptPath, AutoJs6ScriptConfigurationSerializer.readScriptPath(element))
+
+        AutoJs6ScriptConfigurationSerializer.writeScriptPath(element, "")
+        assertEquals("", AutoJs6ScriptConfigurationSerializer.readScriptPath(element))
+    }
+
+    @Test fun autoJs6ScriptValidationAcceptsOnlyLocalJsFiles() {
+        val dir = Files.createTempDirectory("autojs6-script-validation")
+        try {
+            val jsFile = dir.resolve("main.js")
+            val textFile = dir.resolve("main.txt")
+            val missingJsFile = dir.resolve("missing.js")
+            Files.writeString(jsFile, "toast('ok')")
+            Files.writeString(textFile, "not js")
+
+            assertTrue(AutoJs6ScriptCommand.validateLocalJsPath(jsFile.toString()).valid)
+            assertFalse(AutoJs6ScriptCommand.validateLocalJsPath(dir.toString()).valid)
+            assertFalse(AutoJs6ScriptCommand.validateLocalJsPath(textFile.toString()).valid)
+            assertFalse(AutoJs6ScriptCommand.validateLocalJsPath(missingJsFile.toString()).valid)
+        } finally {
+            dir.toFile().deleteRecursively()
+        }
+    }
+
+    @Test fun autoJs6ScriptRunConfigurationPayloadMatchesRunCurrentFilePayloadInReplay() {
+        val dir = Files.createTempDirectory("autojs6-script-payload")
+        val server = ServerSocket(0)
+        val attached = CountDownLatch(1)
+        lateinit var ideDevice: org.autojs.autojs6.jetbrains.device.AutoJs6Device
+        try {
+            val scriptFile = dir.resolve("main.js")
+            val script = "toast('run config')"
+            Files.writeString(scriptFile, script)
+            val absolutePath = scriptFile.toAbsolutePath().toString()
+
+            val runConfigurationPayload = AutoJs6ScriptCommand.readLocalJsPayload(absolutePath).toCommandData()
+            val runCurrentFilePayload = AutoJs6ScriptCommand
+                .createSingleFilePayload(absolutePath, "main.js", script)
+                .toCommandData()
+            assertEquals(runCurrentFilePayload, runConfigurationPayload)
+
+            val acceptThread = Thread {
+                val accepted = server.accept()
+                ideDevice = org.autojs.autojs6.jetbrains.device.AutoJs6Device(
+                    accepted,
+                    { attached.countDown() },
+                    {},
+                    null
+                )
+            }
+            acceptThread.isDaemon = true
+            acceptThread.start()
+
+            val client = Socket("127.0.0.1", server.localPort)
+            val codec = FrameCodec()
+            fun sendClientJson(value: Map<String, Any?>) {
+                client.getOutputStream().write(codec.encode(AutoJs6Constants.TYPE_JSON, JsonCodec.encode(value)))
+                client.getOutputStream().flush()
+            }
+            fun readClientJson(): org.autojs.autojs6.jetbrains.device.JsonPayload {
+                val header = client.getInputStream().readNBytes(8)
+                val payloadLen = java.nio.ByteBuffer.wrap(header).int
+                java.nio.ByteBuffer.wrap(header).int
+                return JsonCodec.decode(client.getInputStream().readNBytes(payloadLen))
+            }
+
+            sendClientJson(mapOf("id" to 1, "type" to "hello", "data" to mapOf(
+                "device_name" to "ReplayDevice",
+                "app_version" to "6.7.0",
+                "app_version_code" to "3591",
+                "device_id" to "replay-run-config"
+            )))
+            assertTrue(attached.await(3, TimeUnit.SECONDS))
+            assertEquals("hello", readClientJson().string("type"))
+
+            ideDevice.sendCommand("run", runConfigurationPayload)
+            val replayed = readClientJson().obj("data")
+            assertEquals("run", replayed?.string("command"))
+            assertEquals(absolutePath, replayed?.string("id"))
+            assertEquals("main.js", replayed?.string("name"))
+            assertEquals(script, replayed?.string("script"))
+
+            ideDevice.close()
+            client.close()
+        } finally {
+            server.close()
+            dir.toFile().deleteRecursively()
+        }
+    }
+
     @Test fun deviceHandshakeAndScriptCommandsUseRealFrames() {
         val server = ServerSocket(0)
         val attached = CountDownLatch(1)
@@ -133,5 +233,4 @@ class MvpUnitTest {
         }
     }
 }
-
 

@@ -41,6 +41,7 @@
 |---|---|
 | 🔌 **Multi-mode Connection** | IDE listener (port `6347`), direct IP (port `7347`), and ADB — three ways to connect your AutoJs6 devices |
 | ▶️ **Run Script** | Run the currently open script on all connected devices with a single shortcut |
+| ▶️ **AutoJs6 Script Run Configuration** | Save and rerun one local `.js` file through JetBrains Run Configurations, the green Run button, recent runs, and <kbd>Shift</kbd> + <kbd>F10</kbd> |
 | 💾 **Save to Device** | Push the current script to all connected devices |
 | ⏹️ **Stop Script** | Stop the current script or all running scripts at once |
 | 📁 **Project Template** | Scaffold a new AutoJs6 project from the built-in AutoJs6 template |
@@ -82,6 +83,15 @@ The built plugin zip will be in `build/distributions/`. Install it via:
 1. Open any `.js` file in the editor
 2. Press <kbd>F6</kbd> — the script runs on all connected devices instantly
 
+### Run a Saved Script Configuration
+
+1. Open **Run → Edit Configurations...**
+2. Add **AutoJs6 Script**
+3. Select one local `.js` file
+4. Run it from the green Run button, recent runs, or <kbd>Shift</kbd> + <kbd>F10</kbd>
+
+`AutoJs6 Script` is intentionally single-file only. Project Run Configuration, Run Project, Save Project, project zip, md5, and `bytes_command` are deferred until project sync/run protocol support is implemented and validated. The plugin does not register or fake an `AutoJs6 Project` Run Configuration.
+
 ## ⌨️ Keyboard Shortcuts
 
 | Action | Shortcut |
@@ -100,7 +110,9 @@ org.autojs.autojs6.jetbrains
 ├── actions    # IDE Actions — UI entry points for all user commands
 ├── adb        # ADB integration — device discovery and port forwarding
 ├── device     # Core networking — socket connections and binary protocol
-└── project    # Project scaffolding — template-based project creation
+├── project    # Project scaffolding — template-based project creation
+├── run        # JetBrains Run Configuration for a single AutoJs6 script file
+└── script     # Shared single-file command payload and validation helpers
 ```
 
 ### Protocol
@@ -182,4 +194,3 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 - [AutoJs6](https://github.com/SuperMonster003/AutoJs6) — The AutoJs6 Android app
 - [AutoJs6 VSCode Extension](https://github.com/niceSilentSam/AutoJs6-VSCode-Extension) — VSCode counterpart
 - [AutoJs6 Docs](https://docs.autojs6.com/) — Official documentation
-

@@ -10,6 +10,8 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <notificationGroup id="AutoJs6 Notifications" displayType="BALLOON"/>
+        <runConfigurationType implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationType"/>
+        <runConfigurationProducer implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationProducer"/>
     </extensions>
 
     <actions>
@@ -40,4 +42,3 @@
         </group>
     </actions>
 </idea-plugin>
-
