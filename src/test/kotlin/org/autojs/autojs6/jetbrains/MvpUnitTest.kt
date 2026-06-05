@@ -1,10 +1,14 @@
 package org.autojs.autojs6.jetbrains
 
 import org.autojs.autojs6.jetbrains.adb.AdbService
+import org.autojs.autojs6.jetbrains.actions.AutoJs6CommandDispatcher
+import org.autojs.autojs6.jetbrains.connection.AutoJs6NetworkInterfaces
 import org.autojs.autojs6.jetbrains.device.AutoJs6Frame
 import org.autojs.autojs6.jetbrains.device.FrameCodec
 import org.autojs.autojs6.jetbrains.device.JsonCodec
+import org.autojs.autojs6.jetbrains.project.AutoJs6ProjectSyncService
 import org.autojs.autojs6.jetbrains.project.AutoJs6ProjectTemplateService
+import org.autojs.autojs6.jetbrains.remote.AutoJs6HttpBridgeService
 import org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationSerializer
 import org.autojs.autojs6.jetbrains.script.AutoJs6ScriptCommand
 import org.jdom.Element
@@ -15,8 +19,10 @@ import kotlin.test.assertTrue
 import java.net.ServerSocket
 import java.net.Socket
 import java.nio.file.Files
+import java.nio.file.attribute.FileTime
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.zip.ZipInputStream
 class MvpUnitTest {
     @Test fun frameCodecUsesBigEndianLengthAndType() {
         val codec = FrameCodec()
@@ -66,6 +72,36 @@ class MvpUnitTest {
         assertTrue(pluginXml.contains("<runConfigurationProducer implementation=\"org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationProducer\"/>"))
     }
 
+    @Test fun pluginXmlRegistersAllVscodeParityActionsAndToolWindow() {
+        val pluginXml = Files.readString(java.nio.file.Path.of("src/main/resources/META-INF/plugin.xml"))
+        val ids = listOf(
+            "AutoJs6.ViewDocument",
+            "AutoJs6.Connect",
+            "AutoJs6.DisconnectAll",
+            "AutoJs6.RunCurrentFile",
+            "AutoJs6.RunWithoutArguments",
+            "AutoJs6.CommandsHierarchy",
+            "AutoJs6.RunOnDevice",
+            "AutoJs6.StopCurrentScript",
+            "AutoJs6.StopAllScripts",
+            "AutoJs6.Rerun",
+            "AutoJs6.SaveCurrentFile",
+            "AutoJs6.SaveToDevice",
+            "AutoJs6.NewUntitledFile",
+            "AutoJs6.NewProject",
+            "AutoJs6.SaveProject",
+            "AutoJs6.SaveProjectWithoutArguments",
+            "AutoJs6.RunProject",
+            "AutoJs6.RunProjectWithoutArguments"
+        )
+        ids.forEach { id -> assertTrue(pluginXml.contains("id=\"$id\""), "missing action $id") }
+        assertTrue(pluginXml.contains("factoryClass=\"org.autojs.autojs6.jetbrains.toolwindow.AutoJs6ToolWindowFactory\""))
+        assertTrue(pluginXml.contains("group-id=\"EditorPopupMenu\""))
+        assertTrue(pluginXml.contains("group-id=\"ProjectViewPopupMenu\""))
+        assertTrue(pluginXml.contains("first-keystroke=\"F6\""))
+        assertTrue(pluginXml.contains("first-keystroke=\"F8\""))
+    }
+
     @Test fun autoJs6ScriptValidationAcceptsOnlyLocalJsFiles() {
         val dir = Files.createTempDirectory("autojs6-script-validation")
         try {
@@ -82,6 +118,80 @@ class MvpUnitTest {
         } finally {
             dir.toFile().deleteRecursively()
         }
+    }
+
+    @Test fun recentHostRecordsPreserveTimestampsAndCanBeCleared() {
+        val settings = AutoJs6SettingsService()
+        settings.addRecentHost("192.168.1.7", 1000)
+        settings.addRecentHost("192.168.1.8:7347", 2000)
+        settings.addRecentHost("192.168.1.7", 3000)
+        assertEquals(listOf("192.168.1.7", "192.168.1.8:7347"), settings.state.recentHostRecords.map { it.host })
+        assertEquals(3000, settings.state.recentHostRecords.first().lastConnectedEpochMillis)
+        assertEquals(2, settings.clearRecentHosts())
+        assertTrue(settings.state.recentHostRecords.isEmpty())
+    }
+
+    @Test fun hostPortParserAcceptsExplicitPortAndRejectsInvalidInput() {
+        assertEquals("192.168.1.2", AutoJs6NetworkInterfaces.parseHostPort("192.168.1.2")?.host)
+        assertEquals(AutoJs6Constants.SERVER_PORT, AutoJs6NetworkInterfaces.parseHostPort("192.168.1.2")?.port)
+        assertEquals(12345, AutoJs6NetworkInterfaces.parseHostPort("192.168.1.2:12345")?.port)
+        assertEquals(null, AutoJs6NetworkInterfaces.parseHostPort("192.168.1.2:not-a-port"))
+    }
+
+    @Test fun commandWhitelistAndHttpGateRejectUnknownCommands() {
+        assertTrue(AutoJs6CommandDispatcher.isWhitelisted("run"))
+        assertTrue(AutoJs6CommandDispatcher.isWhitelisted("rerunProject"))
+        assertFalse(AutoJs6CommandDispatcher.isWhitelisted("formatDisk"))
+        val bridge = AutoJs6HttpBridgeService()
+        assertEquals(400, bridge.handleExecForTest(null, null, null).first)
+        assertEquals(400, bridge.handleExecForTest("formatDisk", null, null).first)
+        assertEquals(400, bridge.handleExecForTest("run", "C:/fixture/main.js", null).first)
+    }
+
+    @Test fun projectSyncBuildsZipMd5IgnoresAndTracksDeletedFiles() {
+        val dir = Files.createTempDirectory("autojs6-project-sync")
+        try {
+            Files.writeString(dir.resolve("project.json"), """{"name":"Demo","ignore":["ignored","out.log"]}""")
+            val main = dir.resolve("main.js")
+            val ignoredDir = dir.resolve("ignored")
+            Files.createDirectories(ignoredDir)
+            Files.writeString(main, "toast('v1')")
+            Files.writeString(ignoredDir.resolve("skip.js"), "toast('skip')")
+            Files.writeString(dir.resolve("out.log"), "skip")
+
+            val service = AutoJs6ProjectSyncService()
+            val first = service.buildPayload(dir, "device-1")
+            assertFalse(first.override)
+            assertTrue(first.modifiedFiles.contains("project.json"))
+            assertTrue(first.modifiedFiles.contains("main.js"))
+            assertFalse(first.modifiedFiles.contains("ignored/skip.js"))
+            assertFalse(first.modifiedFiles.contains("out.log"))
+            assertEquals(AutoJs6ProjectSyncService.md5Hex(first.zipBytes), first.md5)
+            assertTrue(zipEntries(first.zipBytes).contains("main.js"))
+
+            Files.writeString(main, "toast('v2')")
+            Files.setLastModifiedTime(main, FileTime.fromMillis(Files.getLastModifiedTime(main).toMillis() + 2000))
+            val second = service.buildPayload(dir, "device-1")
+            assertTrue(second.override)
+            assertEquals(listOf("main.js"), second.modifiedFiles)
+
+            Files.delete(main)
+            val third = service.buildPayload(dir, "device-1")
+            assertTrue(third.deletedFiles.contains("main.js"))
+        } finally {
+            dir.toFile().deleteRecursively()
+        }
+    }
+
+    private fun zipEntries(bytes: ByteArray): List<String> {
+        val names = mutableListOf<String>()
+        ZipInputStream(bytes.inputStream()).use { zip ->
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                names += entry.name
+            }
+        }
+        return names
     }
 
     @Test fun autoJs6ScriptRunConfigurationPayloadMatchesRunCurrentFilePayloadInReplay() {

@@ -3,7 +3,7 @@
     <name>AutoJs6</name>
     <vendor email="youweics@163.com">AutoJs6</vendor>
     <description><![CDATA[
-        AutoJs6 JetBrains: connect to AutoJs6 devices, run/save/stop current scripts, and create AutoJs6 projects from the built-in AutoJs6 template.
+        AutoJs6 JetBrains: connect to AutoJs6 devices, run/save/stop current scripts, sync AutoJs6 projects, inspect device logs, and create AutoJs6 projects from the built-in AutoJs6 template.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -12,33 +12,147 @@
         <notificationGroup id="AutoJs6 Notifications" displayType="BALLOON"/>
         <configurationType implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationType"/>
         <runConfigurationProducer implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationProducer"/>
+        <toolWindow id="AutoJs6" anchor="right" factoryClass="org.autojs.autojs6.jetbrains.toolwindow.AutoJs6ToolWindowFactory"/>
     </extensions>
 
     <actions>
         <group id="AutoJs6.Group" text="AutoJs6" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
-            <action id="AutoJs6.ViewDocument" class="org.autojs.autojs6.jetbrains.actions.ViewDocumentAction" text="查看在线文档 (View Online Document)"/>
-            <action id="AutoJs6.Connect" class="org.autojs.autojs6.jetbrains.actions.ConnectAction" text="建立设备连接 (Connect)">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F6"/>
-            </action>
-            <action id="AutoJs6.DisconnectAll" class="org.autojs.autojs6.jetbrains.actions.DisconnectAllAction" text="断开所有连接 (Disconnect All)">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift F6"/>
-            </action>
-            <separator/>
-            <action id="AutoJs6.RunCurrentFile" class="org.autojs.autojs6.jetbrains.actions.RunCurrentFileAction" text="运行脚本 (Run)">
-                <keyboard-shortcut keymap="$default" first-keystroke="F6"/>
-            </action>
-            <action id="AutoJs6.SaveCurrentFile" class="org.autojs.autojs6.jetbrains.actions.SaveCurrentFileAction" text="保存到所有设备 (Save)"/>
-            <action id="AutoJs6.StopCurrentScript" class="org.autojs.autojs6.jetbrains.actions.StopCurrentScriptAction" text="停止当前脚本 (Stop)">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl F6"/>
-            </action>
-            <action id="AutoJs6.StopAllScripts" class="org.autojs.autojs6.jetbrains.actions.StopAllScriptsAction" text="停止所有脚本 (Stop All)">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift F6"/>
-            </action>
-            <separator/>
-            <action id="AutoJs6.NewProject" class="org.autojs.autojs6.jetbrains.actions.NewProjectAction" text="新建项目 (New Project)">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 6" second-keystroke="N"/>
-            </action>
         </group>
+        <group id="AutoJs6.EditorPopupGroup" text="AutoJs6" popup="true">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </group>
+        <group id="AutoJs6.ProjectPopupGroup" text="AutoJs6" popup="true">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+        </group>
+        <group id="AutoJs6.ToolbarGroup" text="AutoJs6" popup="true">
+            <add-to-group group-id="MainToolbarRight" anchor="last"/>
+        </group>
+
+        <action id="AutoJs6.ViewDocument" class="org.autojs.autojs6.jetbrains.actions.ViewDocumentAction" text="查看在线文档 (View Online Document)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt shift F6"/>
+        </action>
+        <action id="AutoJs6.Connect" class="org.autojs.autojs6.jetbrains.actions.ConnectAction" text="建立设备连接 (Connect)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ToolbarGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F6"/>
+        </action>
+        <action id="AutoJs6.DisconnectAll" class="org.autojs.autojs6.jetbrains.actions.DisconnectAllAction" text="断开所有连接 (Disconnect All)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift F6"/>
+        </action>
+        <action id="AutoJs6.CommandsHierarchy" class="org.autojs.autojs6.jetbrains.actions.CommandsHierarchyAction" text="命令层级 (Commands Hierarchy)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ToolbarGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="F8"/>
+        </action>
+
+        <action id="AutoJs6.RunCurrentFile" class="org.autojs.autojs6.jetbrains.actions.RunCurrentFileAction" text="运行脚本 (Run)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ToolbarGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="F6"/>
+        </action>
+        <action id="AutoJs6.RunWithoutArguments" class="org.autojs.autojs6.jetbrains.actions.RunWithoutArgumentsAction" text="运行当前脚本（无参数）(Run Current Script)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+        </action>
+        <action id="AutoJs6.RunOnDevice" class="org.autojs.autojs6.jetbrains.actions.RunOnDeviceAction" text="在指定设备运行脚本 (Run on Device)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+        </action>
+        <action id="AutoJs6.StopCurrentScript" class="org.autojs.autojs6.jetbrains.actions.StopCurrentScriptAction" text="停止当前脚本 (Stop)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl F6"/>
+        </action>
+        <action id="AutoJs6.StopAllScripts" class="org.autojs.autojs6.jetbrains.actions.StopAllScriptsAction" text="停止所有脚本 (Stop All)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ToolbarGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift F6"/>
+        </action>
+        <action id="AutoJs6.Rerun" class="org.autojs.autojs6.jetbrains.actions.RerunAction" text="重新运行脚本 (Rerun)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+        </action>
+        <action id="AutoJs6.SaveCurrentFile" class="org.autojs.autojs6.jetbrains.actions.SaveCurrentFileAction" text="保存到所有设备 (Save)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ToolbarGroup" anchor="last"/>
+        </action>
+        <action id="AutoJs6.SaveToDevice" class="org.autojs.autojs6.jetbrains.actions.SaveToDeviceAction" text="保存到指定设备 (Save to Device)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+        </action>
+        <action id="AutoJs6.NewUntitledFile" class="org.autojs.autojs6.jetbrains.actions.NewUntitledFileAction" text="新建未命名脚本 (New Untitled File)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+        </action>
+        <action id="AutoJs6.NewProject" class="org.autojs.autojs6.jetbrains.actions.NewProjectAction" text="新建项目 (New Project)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 6" second-keystroke="N"/>
+        </action>
+
+        <action id="AutoJs6.SaveProject" class="org.autojs.autojs6.jetbrains.actions.SaveProjectAction" text="保存项目 (Save Project)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 6" second-keystroke="S"/>
+        </action>
+        <action id="AutoJs6.SaveProjectWithoutArguments" class="org.autojs.autojs6.jetbrains.actions.SaveProjectWithoutArgumentsAction" text="保存当前项目（无参数）(Save Current Project)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+        </action>
+        <action id="AutoJs6.RunProject" class="org.autojs.autojs6.jetbrains.actions.RunProjectAction" text="运行项目 (Run Project)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="alt F6"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 6" second-keystroke="R"/>
+        </action>
+        <action id="AutoJs6.RunProjectWithoutArguments" class="org.autojs.autojs6.jetbrains.actions.RunProjectWithoutArgumentsAction" text="运行当前项目（无参数）(Run Current Project)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.EditorPopupGroup" anchor="last"/>
+        </action>
+
+        <action id="AutoJs6.DiagnosticsSummary" class="org.autojs.autojs6.jetbrains.actions.DiagnosticsSummaryAction" text="诊断摘要 (Diagnostics Summary)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ToolbarGroup" anchor="last"/>
+        </action>
+        <action id="AutoJs6.DebugHelp" class="org.autojs.autojs6.jetbrains.actions.DebugHelpAction" text="调试帮助 (Debug Help)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+        </action>
+        <action id="AutoJs6.StartHttpBridge" class="org.autojs.autojs6.jetbrains.actions.StartHttpBridgeAction" text="启动 HTTP Bridge（安全 loopback）(Start HTTP Bridge)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+        </action>
+        <action id="AutoJs6.StartHttpBridgeCompatibility" class="org.autojs.autojs6.jetbrains.actions.StartHttpBridgeCompatibilityAction" text="启动 HTTP Bridge 兼容模式 (Start HTTP Bridge Compatibility Mode)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+        </action>
+        <action id="AutoJs6.StopHttpBridge" class="org.autojs.autojs6.jetbrains.actions.StopHttpBridgeAction" text="停止 HTTP Bridge (Stop HTTP Bridge)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+        </action>
+        <action id="AutoJs6.DisconnectSelectedDevice" class="org.autojs.autojs6.jetbrains.actions.DisconnectSelectedDeviceAction" text="断开选中设备 (Disconnect Selected Device)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+        </action>
+        <action id="AutoJs6.RunSelectedDevice" class="org.autojs.autojs6.jetbrains.actions.RunSelectedDeviceAction" text="在选中设备运行脚本 (Run Selected Device)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+        </action>
+        <action id="AutoJs6.SaveSelectedDevice" class="org.autojs.autojs6.jetbrains.actions.SaveSelectedDeviceAction" text="保存脚本到选中设备 (Save Selected Device)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+        </action>
+        <action id="AutoJs6.StopSelectedDevice" class="org.autojs.autojs6.jetbrains.actions.StopSelectedDeviceAction" text="停止选中设备脚本 (Stop Selected Device)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+        </action>
+        <action id="AutoJs6.DeviceDiagnostics" class="org.autojs.autojs6.jetbrains.actions.DeviceDiagnosticsAction" text="选中设备诊断 (Device Diagnostics)">
+            <add-to-group group-id="AutoJs6.Group" anchor="last"/>
+        </action>
     </actions>
 </idea-plugin>

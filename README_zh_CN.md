@@ -90,7 +90,7 @@ cd AutoJs6-JetBrains
 3. 选择一个本地 `.js` 文件
 4. 通过绿色运行按钮、最近运行记录或 <kbd>Shift</kbd> + <kbd>F10</kbd> 运行
 
-`AutoJs6 Script` 仅支持单文件。项目 Run Configuration、Run Project、Save Project、项目 zip、md5 与 `bytes_command` 均已明确延后，需等待项目同步/项目运行协议实现并验证后另行提案。本插件不会注册或伪造 `AutoJs6 Project` Run Configuration。
+`AutoJs6 Script` 运行配置仍保持单文件语义。VSCode 对齐的项目操作（`Run Project` / `Save Project`）通过 AutoJs6 actions 提供，而不是伪造 `AutoJs6 Project` Run Configuration；它们会解析 `project.json`，生成项目差量 zip，计算 md5，先发送 bytes，再发送 JSON `bytes_command`。
 
 ## ⌨️ 快捷键
 

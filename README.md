@@ -90,7 +90,7 @@ The built plugin zip will be in `build/distributions/`. Install it via:
 3. Select one local `.js` file
 4. Run it from the green Run button, recent runs, or <kbd>Shift</kbd> + <kbd>F10</kbd>
 
-`AutoJs6 Script` is intentionally single-file only. Project Run Configuration, Run Project, Save Project, project zip, md5, and `bytes_command` are deferred until project sync/run protocol support is implemented and validated. The plugin does not register or fake an `AutoJs6 Project` Run Configuration.
+`AutoJs6 Script` remains a single-file Run Configuration. VSCode-parity project actions (`Run Project` / `Save Project`) are exposed as AutoJs6 actions instead of a fake `AutoJs6 Project` Run Configuration; they resolve `project.json`, build a project diff zip, calculate md5, send bytes first, and then send the JSON `bytes_command`.
 
 ## ⌨️ Keyboard Shortcuts
 
