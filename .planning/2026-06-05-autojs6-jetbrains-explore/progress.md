@@ -362,3 +362,42 @@
   - `openspec validate --all --strict`：11 passed, 0 failed。
   - `openspec list --json`：`changes=[]`。
 - 归档位置：`openspec/changes/archive/2026-06-06-complete-autojs6-vscode-parity/`。
+
+### 阶段 17：IDE 2026 兼容上限问题启动
+- **状态：** in_progress
+- **开始时间：** 2026-06-06 13:22:23 +08:00 Asia/Shanghai
+- 用户反馈：插件功能沙箱测试通过，但导入 IDEA 2026 (IU-261.25134.95) 报
+equires build 242.* or older，说明产物兼容上限严重错误。
+- 已恢复活跃计划并执行 session catchup；git diff --stat 当前无输出，说明工作区暂无未提交差异。
+- 下一步：直接审计 Gradle 配置和产物 plugin.xml 的 idea-version。
+
+### 阶段 17 增量：定位兼容上限来源
+- **状态：** in_progress
+- **时间：** 2026-06-06 13:23:48 +08:00 Asia/Shanghai
+- 读取 `build.gradle.kts`、`gradle.properties`、`settings.gradle.kts`、`src/main/resources/META-INF/plugin.xml`。
+- 确认源码 `plugin.xml` 没有手写 `<idea-version>`；生成产物 `build/tmp/patchPluginXml/plugin.xml` 自动变为 `since-build="242" until-build="242.*"`。
+- 一次 ZIP 直接查找 `META-INF/plugin.xml` 失败，因为发行 ZIP 内大概率是嵌套 JAR，需要改为先列 ZIP/JAR 结构再读取内层描述符。
+- 错误记录：第一次写入发现时 PowerShell 双引号 here-string 将 Markdown 反引号解析为转义导致 ParserError；已改用单引号 here-string。
+
+### 阶段 17 增量：修复 patchPluginXml 上限
+- **状态：** in_progress
+- **时间：** 2026-06-06 13:28:41 +08:00 Asia/Shanghai
+- 修改 `build.gradle.kts`：在 `patchPluginXml` 中设置 `untilBuild.set(provider { null })`，保留 `sinceBuild.set("242")`。
+- 新增 `verifyPatchedPluginXmlCompatibility`，并挂到 `check` 与 `buildPlugin`，防止未来产物重新带上 `until-build`。
+- 第一次运行 `patchPluginXml verifyPatchedPluginXmlCompatibility` 失败：Gradle configuration cache 无法序列化被任务闭包捕获的 `TaskContainerScope`。
+- 改为使用 `patchedPluginXmlOutput` provider 后，`patchPluginXml verifyPatchedPluginXmlCompatibility` 已通过。
+- 产物检查：`build/tmp/patchPluginXml/plugin.xml` 现在显示 `<idea-version since-build="242" />`。
+
+### 阶段 17 完成：兼容上限修复与验证
+- **状态：** complete
+- **时间：** 2026-06-06 13:40:36 +08:00 Asia/Shanghai
+- 修改 `build.gradle.kts`：取消 `until-build`，新增 descriptor 兼容门禁，配置 baseline `verifyPlugin` IDE (`IC 2024.2`)。
+- 修改 `docs/release-compatibility-matrix.md`：记录 `untilBuild: unset`、IDEA 2026 import target、descriptor compatibility gate、baseline verifier 状态。
+- 修改 `docs/release-guide.md`：明确 descriptor gate、说明默认 `verifyPlugin` 不等于所有未来 IDE 的完整验证，并补充 IDEA 2026 验证方式。
+- 验证通过：`clean check buildPlugin`、`verifyPlugin`、`check buildPlugin`、ZIP 内层 JAR 描述符检查、`git diff --check`。
+- 注意：`verifyPlugin` 过程中曾因访问 JetBrains API changes 文档超时打印 ERROR，但任务继续完成并判定 IC-242.20224.300 Compatible；该网络错误不影响本次 descriptor 修复结论。
+
+### 阶段 17 追加验证：IDE build
+- **状态：** complete
+- **时间：** 2026-06-06 13:42:02 +08:00 Asia/Shanghai
+- 执行 JetBrains IDE uild_project：成功，problems 为空。

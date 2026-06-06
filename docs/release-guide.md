@@ -14,6 +14,12 @@ Expected ZIP:
 build/distributions/AutoJs6-JetBrains-<version>.zip
 ```
 
+Descriptor compatibility gate:
+
+- `buildPlugin` depends on `verifyPatchedPluginXmlCompatibility`.
+- The ZIP's inner plugin JAR must contain `<idea-version since-build="242" />`.
+- It must not contain `until-build`; otherwise 2025/2026 IDEs can reject the plugin as `242.* or older`.
+
 Install locally:
 
 ```text
@@ -50,14 +56,16 @@ Manual smoke checklist:
 ## 3. Plugin Verifier
 
 Use the IntelliJ Platform Gradle plugin verifier task or the JetBrains Plugin Verifier CLI against the target matrix from `docs/release-compatibility-matrix.md`.
+Do not treat a default `verifyPlugin` pass as proof of all future IDE imports unless the target IDE builds are included in the verifier matrix and the descriptor gate above has passed.
 
-Example Gradle entry point, if configured by the build plugin:
+Configured Gradle entry point for the baseline IC 2024.2 verifier target:
 
 ```powershell
 .\gradlew.bat verifyPlugin --no-daemon
 ```
 
 If using the standalone verifier, download it from JetBrains and run it against the built ZIP and each declared IDE build. Record every result in `docs/release-compatibility-matrix.md` before release.
+For the IDEA 2026 row, either add that IDE to `intellijPlatform.pluginVerification.ides` for the release candidate or run `scripts/manual/ide-family-plugin-verifier.ps1` against the installed IDEA 2026 directory.
 
 ## 4. Signing
 

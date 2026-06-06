@@ -167,3 +167,32 @@
 - 归档时 OpenSpec CLI 自动将 8 个 delta specs 同步到 `openspec/specs/`：新增 advanced-connection-experience、debug-and-breakpoint-parity、device-tool-window-and-logs、project-diff-sync、release-and-compatibility、remote-command-bridge、vscode-parity-actions，并更新 script-run-configuration。
 - 归档后全量校验首次发现历史主规格 `autojs6-project-template` 缺少 `## Purpose` / `## Requirements` 主规格头；已做文档头格式修复，不改变需求语义。
 - 当前 `openspec validate --all --strict` 已 11/11 passed，`openspec list --json` 无 active changes。
+
+## 阶段 17 初始发现：兼容错误性质
+- 用户提供的 IDE 报错核心是：产物声明只兼容 242.* or older，而目标 IDE build 是 IU-261.25134.95。
+- 这通常不是业务代码功能问题，而是插件描述符中的 <idea-version since-build=... until-build=...> 或 Gradle patchPluginXml 生成的兼容范围问题。
+- 当前 git diff --stat 无输出；本轮将以 live 构建产物和当前 Gradle 配置为事实来源。
+
+## 阶段 17 发现：上限来源已定位
+- `build.gradle.kts` 使用 IntelliJ Platform Gradle Plugin `2.2.1`，目标平台 `create("IC", "2024.2")`，且 `patchPluginXml { sinceBuild.set("242") }` 只设置了下限，没有显式处理上限。
+- 当前生成文件 `build/tmp/patchPluginXml/plugin.xml` 已实际包含 `<idea-version since-build="242" until-build="242.*" />`；这与用户在 IDEA 2026 (`IU-261.25134.95`) 看到的 `requires build 242.* or older` 完全吻合。
+- 因此根因是 Gradle patch 产物自动/默认写入 `until-build="242.*"`，导致 2024.2 平台构建出的 ZIP 被锁死在 242 系列，不是插件业务功能测试失败。
+
+## 阶段 17 发现：修复方式验证
+- 本地 IntelliJ Platform Gradle Plugin `2.2.1` 源码 `PatchPluginXmlTask.kt` 注释明确：`until-build` 可以通过 `provider { null }` 取消；仅传 `null` 会回退默认值。
+- 已在 `patchPluginXml` 中增加 `untilBuild.set(provider { null })`，并新增 `verifyPatchedPluginXmlCompatibility` 任务作为回归门禁：要求 `since-build="242"` 存在且不得出现任何 `until-build=`。
+- 首次实现门禁时 `doLast` 捕获了 `TaskContainerScope`，导致 configuration cache 序列化失败；已改为先保存 `patchedPluginXmlOutput` provider，再在 `doLast` 读取该 provider。
+- 当前 `build/tmp/patchPluginXml/plugin.xml` 已变为 `<idea-version since-build="242" />`，不再包含 `until-build="242.*"`。
+
+## 阶段 17 结论：兼容上限已修复
+- `build.gradle.kts` 现在同时处理三个门禁：
+  - `patchPluginXml` 取消 `until-build`，生成 `<idea-version since-build="242" />`；
+  - `verifyPatchedPluginXmlCompatibility` 挂到 `check` 和 `buildPlugin`，防止 ZIP 描述符回退到 `242.*`；
+  - `pluginVerification.ides` 配置了 `IC 2024.2`，让 `verifyPlugin` 不再因没有 verifier IDE 目标而失败。
+- 验证结果：
+  - `.\gradlew.bat --no-daemon --console=plain clean check buildPlugin`：通过；
+  - `.\gradlew.bat --no-daemon --console=plain verifyPlugin`：通过，IC-242.20224.300 Compatible，报告 6 个 deprecated API usages；
+  - `.\gradlew.bat --no-daemon --console=plain check buildPlugin`：通过；
+  - `git diff --check`：通过；
+  - ZIP 内层 JAR `META-INF/plugin.xml`：`<idea-version since-build="242" />`，无 `until-build`。
+- IDEA 2026 (`IU-261.25134.95`) 的“导入被 242.* 拒绝”应由新 ZIP 解决；但 2026 API 级兼容仍需对本机 IDEA 2026 跑 Plugin Verifier/manual smoke，不能把 baseline verifier 结果冒充为完整 2026 验证。

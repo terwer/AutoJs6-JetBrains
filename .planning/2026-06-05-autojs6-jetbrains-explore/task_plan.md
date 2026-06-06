@@ -4,7 +4,7 @@
 在不开始写业务代码的前提下，探索 `AutoJs6-VSCode-Extension` 的功能、入口和迁移边界，并为 `AutoJs6-JetBrains` 制定可执行的 JetBrains 插件开发计划。
 
 ## 当前阶段
-阶段 16
+阶段 17
 
 ## 各阶段
 
@@ -163,4 +163,12 @@
 - [x] change 已移动到 `openspec/changes/archive/2026-06-06-complete-autojs6-vscode-parity/`。
 - [x] 修正历史主规格 `autojs6-project-template` 的旧 delta 头格式为当前 OpenSpec 主规格格式。
 - [x] 执行 `openspec validate --all --strict`：11/11 passed；`openspec list --json`：无 active changes。
+- **状态：** complete
+
+### 阶段 17：修复 IDE 2026 插件兼容上限
+- [x] 定位 ZIP/JAR 中 `META-INF/plugin.xml` 的 `idea-version` 实际值，确认为何被限制到 `242.* or older`。
+- [x] 审计 Gradle IntelliJ Platform 配置、`plugin.xml` patch/verifyPlugin 任务和发布文档，找出兼容范围来源。
+- [x] 做最小修复：支持 2024+ 且不被 2024.2 上限锁死；避免把未验证 IDE 虚假声明为已验证。
+- [x] 重新构建插件并检查产物描述符，必要时运行测试/校验命令。
+- [x] 记录证据、错误和后续验证建议。
 - **状态：** complete

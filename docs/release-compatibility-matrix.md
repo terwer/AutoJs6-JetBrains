@@ -9,6 +9,7 @@ Baseline platform in `build.gradle.kts`:
 ```text
 IntelliJ Platform: IC 2024.2
 sinceBuild: 242
+untilBuild: unset (no upper IDE build cap in the patched plugin descriptor)
 Required module: com.intellij.modules.platform
 JDK toolchain: 21
 ```
@@ -16,6 +17,7 @@ JDK toolchain: 21
 | IDE family | Target status | Verification evidence | Exception / notes |
 |---|---|---|---|
 | IntelliJ IDEA Community / Ultimate 2024.2+ | Target | Build against IC 2024.2; runIde/manual smoke required before release | Current automated tests do not replace runIde smoke |
+| IntelliJ IDEA Ultimate 2026.1 (`IU-261.25134.95`) | Install target / smoke required | Descriptor must be `<idea-version since-build="242" />`; Plugin Verifier + manual import/run smoke required | Added after the 2026 import blocker caused by `until-build="242.*"` |
 | WebStorm 2024.2+ | Target if platform action/toolwindow APIs available | Plugin Verifier + manual JS file action smoke required | JavaScript language features are IDE-provided; plugin does not ship JS language service |
 | PyCharm 2024.2+ | Target if platform action/toolwindow APIs available | Plugin Verifier + manual `.js` file smoke required | JS support varies by edition/plugins; AutoJs6 actions operate on local `.js` files by extension |
 | PhpStorm / RubyMine / GoLand / CLion / Rider 2024.2+ | Target if platform module compatibility passes | Plugin Verifier required | Product-specific menu/keymap conflicts must be documented |
@@ -48,6 +50,7 @@ JDK toolchain: 21
 | Project sync | Unit diff test; live manual `save_project`/`run_project` replay | Plugin UI background task + cancellation smoke |
 | Tool Window/logs | Implementation registration test | Device connect/log/disconnect UI smoke |
 | IDE family | Build against IC 2024.2 | Plugin Verifier per IDE family row |
+| Descriptor compatibility | `verifyPatchedPluginXmlCompatibility` and `buildPlugin` check patched descriptor | ZIP inner JAR must contain `<idea-version since-build="242" />` and no `until-build` |
 
 ## Manual scripts
 
@@ -61,6 +64,7 @@ JDK toolchain: 21
 ## Current release gate status
 
 - Automated tests: passing as of the latest `./gradlew.bat test --no-daemon` run.
+- Baseline Plugin Verifier: `.\gradlew.bat verifyPlugin --no-daemon` passes against IC 2024.2; IDEA 2026-specific verifier/manual smoke remains required before claiming full 2026 support.
 - Distributable ZIP: must be regenerated for each release by `buildPlugin`.
 - Full IDE-family support claim: **Open** until Plugin Verifier/manual matrix is recorded.
 - Full HTTP successful dispatch claim: **Open** until runIde manual `/exec` dispatch is recorded.
