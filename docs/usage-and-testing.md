@@ -318,6 +318,28 @@ Sent: save_project and run_project bytes_command
 Observed: live device log frame after dispatch
 ```
 
+### 7.1 右下状态栏设备切换
+
+连接设备后，IDE 右下 Status Bar 会显示当前 AutoJs6 设备：
+
+```text
+AutoJs6: Pixel_8 ▾
+```
+
+点击该 Widget 可在已连接设备之间切换，例如模拟器、本机、ADB 设备。切换的是 shared selected device：
+
+- Tool Window 中的 Run / Save / Stop / Disconnect 按钮会使用该 selected device。
+- `Run on Device` / `Save to Device` / selected-device diagnostics 会优先使用该 selected device。
+- 普通 `Run` / `Save` / `Run Project` / `Save Project` 仍保持 VSCode-compatible all-devices 语义，不会因为状态栏切换而静默变成单设备命令。
+
+实时性验证：
+
+```text
+1. 连接两个设备，确认状态栏显示当前设备。
+2. 点击状态栏切换到另一个设备，确认 Tool Window 选中行同步变化。
+3. 断开当前设备，确认状态栏自动切到剩余设备或显示“无设备”。
+```
+
 ## 8. 验证新建项目
 
 执行：
@@ -394,6 +416,7 @@ adb devices -l
 8. 验证 Save / Stop / Stop All
 9. 验证 AutoJs6 Script Run Configuration 可创建并运行单个 .js 文件
 9b. 验证 AutoJs6 Project Run Configuration 可创建并运行包含 project.json 的项目
+9c. 验证右下 Status Bar 显示已连接设备，并可切换 selected device
 10. 验证 New Project 生成 project.json
 11. 验证 Run Project / Save Project 对有效 project.json 项目发送 bytes_command
 ```

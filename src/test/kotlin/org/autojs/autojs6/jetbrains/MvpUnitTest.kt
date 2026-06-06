@@ -4,6 +4,7 @@ import org.autojs.autojs6.jetbrains.adb.AdbService
 import org.autojs.autojs6.jetbrains.actions.AutoJs6CommandDispatcher
 import org.autojs.autojs6.jetbrains.connection.AutoJs6NetworkInterfaces
 import org.autojs.autojs6.jetbrains.device.AutoJs6Frame
+import org.autojs.autojs6.jetbrains.device.AutoJs6DeviceSnapshot
 import org.autojs.autojs6.jetbrains.device.FrameCodec
 import org.autojs.autojs6.jetbrains.device.JsonCodec
 import org.autojs.autojs6.jetbrains.project.AutoJs6ProjectSyncService
@@ -14,6 +15,7 @@ import org.autojs.autojs6.jetbrains.remote.AutoJs6HttpBridgeService
 import org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationSerializer
 import org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationSerializer
 import org.autojs.autojs6.jetbrains.script.AutoJs6ScriptCommand
+import org.autojs.autojs6.jetbrains.statusbar.AutoJs6DeviceStatusText
 import org.jdom.Element
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -85,6 +87,7 @@ class MvpUnitTest {
         assertFalse(pluginXml.contains("<runConfigurationType"))
         assertTrue(pluginXml.contains("<runConfigurationProducer implementation=\"org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationProducer\"/>"))
         assertTrue(pluginXml.contains("<runConfigurationProducer implementation=\"org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationProducer\"/>"))
+        assertTrue(pluginXml.contains("<statusBarWidgetFactory id=\"AutoJs6DeviceStatus\" implementation=\"org.autojs.autojs6.jetbrains.statusbar.AutoJs6DeviceStatusBarWidgetFactory\""))
     }
 
     @Test fun pluginXmlRegistersAllVscodeParityActionsAndToolWindow() {
@@ -119,6 +122,33 @@ class MvpUnitTest {
         assertTrue(pluginXml.substringAfter("id=\"AutoJs6.SaveProject\"").substringBefore("</action>").contains("group-id=\"AutoJs6.ToolbarGroup\""))
         assertTrue(pluginXml.contains("first-keystroke=\"F6\""))
         assertTrue(pluginXml.contains("first-keystroke=\"F8\""))
+    }
+
+    @Test fun statusBarDeviceTextReflectsSelectionAndEmptyState() {
+        val emulator = AutoJs6DeviceSnapshot(
+            key = "emulator-5554",
+            name = "Pixel_8",
+            connectionType = "ADB",
+            endpoint = "emulator-5554",
+            status = "connected",
+            version = "6.7.0 (3591)",
+            adbDeviceId = "emulator-5554"
+        )
+        val phone = AutoJs6DeviceSnapshot(
+            key = "phone-1",
+            name = "本机",
+            connectionType = "LAN server",
+            endpoint = "192.168.1.8:7347",
+            status = "connected",
+            version = "6.7.0 (3591)",
+            adbDeviceId = null
+        )
+
+        assertEquals("AutoJs6: 无设备", AutoJs6DeviceStatusText.selectedValue(emptyList(), null))
+        assertEquals("AutoJs6: Pixel_8", AutoJs6DeviceStatusText.selectedValue(listOf(emulator, phone), emulator.key))
+        assertEquals("AutoJs6: 本机", AutoJs6DeviceStatusText.selectedValue(listOf(emulator, phone), phone.key))
+        assertEquals("AutoJs6: 2 设备", AutoJs6DeviceStatusText.selectedValue(listOf(emulator, phone), null))
+        assertTrue(AutoJs6DeviceStatusText.tooltip(listOf(emulator, phone), phone.key).contains("192.168.1.8:7347"))
     }
 
     @Test fun autoJs6ScriptValidationAcceptsOnlyLocalJsFiles() {

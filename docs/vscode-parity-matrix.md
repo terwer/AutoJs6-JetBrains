@@ -7,6 +7,7 @@
 - 已补齐右上 Toolbar/editor-title 等效入口：`Run Project` / `Save Project` 现在加入 `AutoJs6.ToolbarGroup`。
 - 已注册 `AutoJs6 Project` Run Configuration，可在 `Run | Edit Configurations...` 中创建，运行时复用 project diff/zip/md5/`bytes_command.command=run_project` 语义。
 - `CommandsHierarchy -> Run Project/Save Project` 仍按同一 `sendProjectCommand` 路径发送；自动化 replay 已覆盖插件项目同步代码发送 bytes frame 后再发送 `bytes_command`。若设备端对“项目已同步但未显式重新执行”没有可见效果，不强制改变 VSCode 兼容 diff 语义。
+- 已增加右下 Status Bar 设备 Widget：显示当前 AutoJs6 连接设备，点击可在模拟器/本机/多设备之间切换 selected device；该能力是 additive helper，不改变 run/save project 的 all-devices parity 语义。
 
 ## 证据来源
 
@@ -26,6 +27,7 @@
   - `src/main/kotlin/org/autojs/autojs6/jetbrains/project/AutoJs6ProjectSyncService.kt`
   - `src/main/kotlin/org/autojs/autojs6/jetbrains/remote/AutoJs6HttpBridgeService.kt`
   - `src/main/kotlin/org/autojs/autojs6/jetbrains/toolwindow/AutoJs6ToolWindowFactory.kt`
+  - `src/main/kotlin/org/autojs/autojs6/jetbrains/statusbar/*`
 
 ## Commands / menus / keybindings
 
@@ -78,6 +80,7 @@
 | Shortcuts | VSCode contributes F6/F8 and chords directly | JetBrains registers suggested keymap metadata; users may override conflicts | `plugin.xml` shortcuts; task 2 tests inspect F6/F8/chords |
 | Run Configuration | VSCode has no JetBrains Run Configuration | `AutoJs6 Script` and `AutoJs6 Project` are JetBrains-native additive run entries that reuse the same script/project command protocols | Existing script Run Configuration payload replay test; project configuration registration/serializer tests |
 | Tool Window/Diagnostics | VSCode uses output channel and quick picks | JetBrains adds Tool Window/device table/diagnostics as additive helpers | `AutoJs6ToolWindowFactory`, `DiagnosticsSummaryAction` |
+| Status Bar device switcher | VSCode uses quick picks / output-centric device selection | JetBrains adds a status bar device widget for live selected-device visibility and switching | `AutoJs6DeviceStatusBarWidgetFactory`, `AutoJs6DeviceStatusText`, `statusBarDeviceTextReflectsSelectionAndEmptyState`; all-devices commands remain unchanged |
 
 ## Manual regression blockers and resolution
 
@@ -92,3 +95,4 @@
 - Any row marked Missing/Partial/Open cannot be used to claim full parity release.
 - Project/HTTP/ADB/IDE-family claims require passing tests, replay, real-device evidence, or explicit documented exception.
 - JetBrains-only convenience actions (`DiagnosticsSummary`, selected-device wrappers, Debug Help) are additive wrappers/helpers and do not replace the 18 VSCode command rows.
+- Status Bar device switching only updates the shared selected-device state used by selected-device actions and Tool Window operations; it must not silently turn VSCode-compatible broadcast commands into single-device commands.

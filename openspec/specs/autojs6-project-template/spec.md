@@ -1,6 +1,10 @@
 # autojs6-project-template Specification
 
-## ADDED Requirements
+## Purpose
+
+Define how the plugin creates a brand-new AutoJs6 project from the bundled template while preserving project-template compatibility and avoiding accidental migration or overwrite behavior.
+
+## Requirements
 
 ### Requirement: Create New AutoJs6 Project From Plugin Template
 

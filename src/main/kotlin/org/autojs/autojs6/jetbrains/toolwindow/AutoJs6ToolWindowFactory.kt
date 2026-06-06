@@ -41,17 +41,17 @@ private class AutoJs6ToolWindowPanel(private val project: Project) : Disposable,
     }
     private val table = JTable(tableModel)
     private val logArea = JTextArea()
+    private val rowKeys = mutableListOf<String>()
+    private var refreshingDevices = false
     val component: JPanel = JPanel(BorderLayout())
 
     init {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
         table.preferredScrollableViewportSize = Dimension(600, 160)
         table.selectionModel.addListSelectionListener {
-            if (!it.valueIsAdjusting) {
+            if (!it.valueIsAdjusting && !refreshingDevices) {
                 val row = table.selectedRow
-                val key = if (row >= 0) table.getValueAt(row, 0)?.toString() else null
-                val snapshot = service.deviceSnapshots().firstOrNull { snap -> snap.name == key }
-                service.selectDevice(snapshot?.key)
+                service.selectDevice(rowKeys.getOrNull(row))
             }
         }
         logArea.isEditable = false
@@ -79,17 +79,26 @@ private class AutoJs6ToolWindowPanel(private val project: Project) : Disposable,
         appendLog(device, "[disconnect] $reason")
         refreshDevices()
     }
+    override fun selectedDeviceChanged(device: AutoJs6Device?) = refreshDevices()
     override fun logReceived(device: AutoJs6Device, text: String) = appendLog(device, text)
 
     private fun refreshDevices() {
         SwingUtilities.invokeLater {
-            val selected = service.selectedConnectedDevice()?.key()
-            tableModel.setRowCount(0)
-            service.deviceSnapshots().forEach { snap ->
-                tableModel.addRow(arrayOf(snap.name, snap.connectionType, snap.endpoint, snap.status, snap.version))
+            val selected = service.selectedDeviceKey()
+            val snapshots = service.deviceSnapshots()
+            refreshingDevices = true
+            try {
+                rowKeys.clear()
+                tableModel.setRowCount(0)
+                snapshots.forEach { snap ->
+                    rowKeys += snap.key
+                    tableModel.addRow(arrayOf(snap.name, snap.connectionType, snap.endpoint, snap.status, snap.version))
+                }
+                val rowToSelect = snapshots.indexOfFirst { it.key == selected }
+                if (rowToSelect >= 0) table.setRowSelectionInterval(rowToSelect, rowToSelect) else table.clearSelection()
+            } finally {
+                refreshingDevices = false
             }
-            val rowToSelect = service.deviceSnapshots().indexOfFirst { it.key == selected }
-            if (rowToSelect >= 0) table.setRowSelectionInterval(rowToSelect, rowToSelect)
         }
     }
 

@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 interface AutoJs6ConnectionListener {
     fun deviceAttached(device: AutoJs6Device) {}
     fun deviceDetached(device: AutoJs6Device, reason: String) {}
+    fun selectedDeviceChanged(device: AutoJs6Device?) {}
     fun logReceived(device: AutoJs6Device, text: String) {}
 }
 
@@ -212,7 +213,15 @@ class AutoJs6ConnectionService : Disposable {
     fun connectedDevices(): List<AutoJs6Device> = devices.filter { it.attached }
     fun deviceSnapshots(): List<AutoJs6DeviceSnapshot> = connectedDevices().map { it.snapshot() }
 
-    fun selectDevice(key: String?) { selectedDeviceKey = key }
+    fun selectedDeviceKey(): String? = selectedConnectedDevice()?.key()
+
+    fun selectDevice(key: String?) {
+        val normalizedKey = key?.let { wanted -> connectedDevices().firstOrNull { it.key() == wanted }?.key() }
+        if (selectedDeviceKey == normalizedKey) return
+        selectedDeviceKey = normalizedKey
+        notifySelectedDeviceChanged()
+    }
+
     fun selectedConnectedDevice(): AutoJs6Device? = selectedDeviceKey?.let { key -> connectedDevices().firstOrNull { it.key() == key } }
 
     fun diagnosticSummary(): String {
@@ -323,12 +332,14 @@ class AutoJs6ConnectionService : Disposable {
         val snapshot = devices.toList()
         snapshot.forEach { it.close() }
         devices.clear()
+        val selectionChanged = selectedDeviceKey != null
         selectedDeviceKey = null
         AutoJs6Notifier.info(notificationProject, "已断开所有 AutoJs6 设备连接")
         notifyUi {
             snapshot.forEach { device ->
                 listeners.forEach { it.deviceDetached(device, "disconnectAll") }
             }
+            if (selectionChanged) listeners.forEach { it.selectedDeviceChanged(null) }
         }
     }
 
@@ -340,9 +351,13 @@ class AutoJs6ConnectionService : Disposable {
             return
         }
         if (!devices.contains(device)) devices += device
-        if (selectedDeviceKey == null) selectedDeviceKey = device.key()
+        val selectionChanged = selectedDeviceKey == null
+        if (selectionChanged) selectedDeviceKey = device.key()
         AutoJs6Notifier.info(notificationProject, "AutoJs6 设备已连接: $device")
-        notifyUi { listeners.forEach { it.deviceAttached(device) } }
+        notifyUi {
+            listeners.forEach { it.deviceAttached(device) }
+            if (selectionChanged) listeners.forEach { it.selectedDeviceChanged(device) }
+        }
     }
 
     private fun duplicateIdentity(a: AutoJs6Device, b: AutoJs6Device): Boolean =
@@ -352,10 +367,14 @@ class AutoJs6ConnectionService : Disposable {
 
     private fun detach(device: AutoJs6Device, reason: String) {
         val removed = devices.remove(device)
-        if (selectedDeviceKey == device.key()) selectedDeviceKey = connectedDevices().firstOrNull()?.key()
+        val selectionChanged = selectedDeviceKey == device.key()
+        if (selectionChanged) selectedDeviceKey = connectedDevices().firstOrNull()?.key()
         if (removed) {
             AutoJs6Notifier.info(notificationProject, "AutoJs6 设备已断开: ${device.endpoint()} ($reason)")
-            notifyUi { listeners.forEach { it.deviceDetached(device, reason) } }
+            notifyUi {
+                listeners.forEach { it.deviceDetached(device, reason) }
+                if (selectionChanged) listeners.forEach { it.selectedDeviceChanged(selectedConnectedDevice()) }
+            }
         }
     }
 
@@ -374,6 +393,11 @@ class AutoJs6ConnectionService : Disposable {
 
     private fun notifyUi(block: () -> Unit) {
         ApplicationManager.getApplication().invokeLater(block)
+    }
+
+    private fun notifySelectedDeviceChanged() {
+        val selected = selectedConnectedDevice()
+        notifyUi { listeners.forEach { it.selectedDeviceChanged(selected) } }
     }
 
     override fun dispose() {

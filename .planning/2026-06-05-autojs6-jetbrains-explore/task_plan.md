@@ -4,7 +4,7 @@
 在不开始写业务代码的前提下，探索 `AutoJs6-VSCode-Extension` 的功能、入口和迁移边界，并为 `AutoJs6-JetBrains` 制定可执行的 JetBrains 插件开发计划。
 
 ## 当前阶段
-阶段 13
+阶段 16
 
 ## 各阶段
 
@@ -136,4 +136,31 @@
 - [x] 同步 OpenSpec delta：新增 `script-run-configuration` 对 `AutoJs6 Project` Run Configuration 的规格变更，移除 deferred 要求
 - [x] 更新 parity matrix、compatibility ledger、usage docs 和 tasks，68/68 tasks complete
 - [x] 验证通过：`test --rerun-tasks`、`openspec validate --strict`、`check`、`buildPlugin`、IDE build、`git diff --check`
+- **状态：** complete
+
+### 阶段 14：探索状态栏设备显示与切换优化
+- [x] 恢复当前 parity 完成上下文，确认该需求属于 JetBrains-native additive helper，不阻断 VSCode parity 完成状态。
+- [x] 审计现有 `AutoJs6ConnectionService`、Tool Window 设备选择与动作调用链。
+- [x] 在本地 IntelliJ 2024.2 平台包中确认 `statusBarWidgetFactory` 扩展点和 StatusBarWidget API 可用。
+- [x] 识别实时性风险：当前 listener 无 selected-device-change 通知，Tool Window 通过设备 name 反查 key，重复设备名下不够稳。
+- [x] 给出是否值得实现、最小实现边界和测试建议。
+- **状态：** complete
+
+
+### 阶段 15：实现状态栏设备显示与切换最后优化
+- [x] 新增 `AutoJs6DeviceStatus` Status Bar Widget，显示无设备、当前设备或多设备状态。
+- [x] 点击 Widget 弹出 connected devices 列表，并用 snapshot `key` 切换 shared selected device。
+- [x] 扩展 `AutoJs6ConnectionListener.selectedDeviceChanged`，让 attach/detach/disconnectAll/手动切换都实时刷新状态栏和 Tool Window。
+- [x] 修正 Tool Window 选择逻辑，不再用设备 name 反查，避免模拟器/本机重名时选错。
+- [x] 更新 OpenSpec tasks/spec、parity matrix、compatibility ledger、usage docs，并补单测。
+- [x] 验证通过：`test --rerun-tasks`、`openspec validate --strict`、`openspec instructions apply`、`check`、`buildPlugin`、IDE build、`git diff --check`。
+- **状态：** complete
+
+
+### 阶段 16：归档 complete-autojs6-vscode-parity
+- [x] 确认 change artifact 全部 done，tasks 69/69 complete。
+- [x] 执行 `openspec archive complete-autojs6-vscode-parity --yes`，同步 delta specs 到主 specs。
+- [x] change 已移动到 `openspec/changes/archive/2026-06-06-complete-autojs6-vscode-parity/`。
+- [x] 修正历史主规格 `autojs6-project-template` 的旧 delta 头格式为当前 OpenSpec 主规格格式。
+- [x] 执行 `openspec validate --all --strict`：11/11 passed；`openspec list --json`：无 active changes。
 - **状态：** complete

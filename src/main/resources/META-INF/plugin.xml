@@ -14,6 +14,7 @@
         <configurationType implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationType"/>
         <runConfigurationProducer implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationProducer"/>
         <runConfigurationProducer implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationProducer"/>
+        <statusBarWidgetFactory id="AutoJs6DeviceStatus" implementation="org.autojs.autojs6.jetbrains.statusbar.AutoJs6DeviceStatusBarWidgetFactory" order="before Memory"/>
         <toolWindow id="AutoJs6" anchor="right" factoryClass="org.autojs.autojs6.jetbrains.toolwindow.AutoJs6ToolWindowFactory"/>
     </extensions>
 

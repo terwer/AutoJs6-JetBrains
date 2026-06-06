@@ -319,3 +319,46 @@
   - IDE `build_project`：通过，`problems=[]`。
   - `git diff --check`：通过。
 - 说明：对“项目已同步但设备没有可见执行效果”的情况，当前保持 VSCode-compatible diff/bytes_command 语义，不强制改成 full sync；如设备端不支持无变更触发可见执行，应记录为设备行为而不是改协议。
+
+### 阶段 14：状态栏设备显示/切换优化探索
+- **状态：** complete
+- **时间：** 2026-06-06 Asia/Shanghai
+- 执行的操作：
+  - 读取活跃规划与 `openspec list --json`，确认 `complete-autojs6-vscode-parity` 当前 68/68 complete。
+  - 审计 `AutoJs6ConnectionService.kt`、`AutoJs6ToolWindowFactory.kt`、`AutoJs6Actions.kt`、`plugin.xml` 和现有单测。
+  - 搜索本地 IntelliJ 2024.2 平台包，确认状态栏扩展点和 API 签名。
+- 结论：状态栏显示已连接设备并点击切换当前设备是高可行、低风险优化；关键是增加“选中设备变化”的实时通知，并避免用设备 name 做选择键。
+- 错误日志：
+  - `jar tf` 不可用：当前 PATH 没有 `jar.exe`；改用 `.NET ZipFile` 搜索 jar 内容，并用 `C:\Program Files\Java\jdk-21\bin\javap.exe` 查看 API。
+
+### 阶段 15：状态栏设备显示/切换实现
+- **状态：** complete
+- **时间：** 2026-06-06 Asia/Shanghai
+- 执行的操作：
+  - 新增状态栏实现文件：`AutoJs6DeviceStatusBarWidget.kt`、`AutoJs6DeviceStatusBarWidgetFactory.kt`、`AutoJs6DeviceStatusText.kt`。
+  - 修改 `AutoJs6ConnectionService.kt`，增加 `selectedDeviceChanged` 实时通知与 `selectedDeviceKey()` 读取入口。
+  - 修改 `AutoJs6ToolWindowFactory.kt`，用 device key 维护表格选择，和状态栏共享 selected device。
+  - 修改 `plugin.xml` 注册 `statusBarWidgetFactory`。
+  - 修改 `MvpUnitTest.kt`，覆盖状态栏注册和设备文本/tooltip 状态。
+  - 更新 `openspec/changes/complete-autojs6-vscode-parity` tasks/spec 与 docs 台账。
+- 验证结果：
+  - `./gradlew.bat --no-daemon --console=plain test --rerun-tasks`：通过。
+  - `openspec validate complete-autojs6-vscode-parity --strict`：通过。
+  - `openspec instructions apply --change complete-autojs6-vscode-parity --json`：69/69 complete，state=all_done。
+  - `./gradlew.bat --no-daemon --console=plain check`：通过。
+  - `./gradlew.bat --no-daemon --console=plain buildPlugin`：通过。
+  - IDE `build_project`：通过，`problems=[]`。
+  - `git diff --check`：通过。
+
+### 阶段 16：OpenSpec 归档
+- **状态：** complete
+- **时间：** 2026-06-06 Asia/Shanghai
+- 执行的操作：
+  - `openspec list --json`：确认仅有 `complete-autojs6-vscode-parity` active，69/69 complete。
+  - `openspec status --change complete-autojs6-vscode-parity --json`：proposal/design/specs/tasks 全部 done。
+  - `openspec archive complete-autojs6-vscode-parity --yes`：同步 specs 并归档。
+  - 修复 `openspec/specs/autojs6-project-template/spec.md` 的主规格标题格式。
+- 验证结果：
+  - `openspec validate --all --strict`：11 passed, 0 failed。
+  - `openspec list --json`：`changes=[]`。
+- 归档位置：`openspec/changes/archive/2026-06-06-complete-autojs6-vscode-parity/`。

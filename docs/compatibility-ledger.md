@@ -4,7 +4,7 @@
 
 1. **协议/运行时兼容性优先**：连接、hello、script command、project `bytes_command` 使用 VSCode 扩展观察到的 frame 与 payload 语义；新建项目只使用插件内置模板创建全新项目。
 2. **保留用户习惯并采用 JetBrains best practices**：18 个 VSCode command 都有 JetBrains Action；入口通过 Tools、Action Search、Editor/Project View context、Tool Window、Notification、Background Task 暴露。
-3. **Additive feature policy**：Tool Window、诊断摘要、Debug Help、Run Configuration、HTTP safe mode 是 additive helper，不替代必需 VSCode-equivalent 行为。
+3. **Additive feature policy**：Tool Window、状态栏设备切换、诊断摘要、Debug Help、Run Configuration、HTTP safe mode 是 additive helper，不替代必需 VSCode-equivalent 行为。
 4. **No mock/fake/speculation**：没有真实实现和验证的发布/IDE-family/Marketplace 声明保持 open；不能用空 zip、假 md5、静态设备、fake connected 或未知 protocol 字段标记完成。
 
 ## 已实现能力台账
@@ -16,6 +16,7 @@
 | Frame protocol | `device.ts`: 8-byte header, JSON=1, bytes=2 | `FrameCodec.kt`, `JsonCodec.kt` | frame/json replay unit tests | 无 |
 | Hello/version | AutoJs6 min `6.7.0 / 3591` | `AutoJs6Device.onHello` | replay tests；ADB live hello from `emulator-5560` / `HONOR SDY-AN00` / code `3810` | 无 |
 | Device logs | VSCode output channel receives `data:log` | Tool Window log panel via `AutoJs6ConnectionListener.logReceived` | fixture row + implementation | UI screenshot可在 release 附件补充 |
+| Status Bar device switcher | VSCode 使用 quick pick/命令入口选择设备 | `statusBarWidgetFactory` 注册 `AutoJs6DeviceStatus`，显示当前连接设备并用 snapshot key 切换 shared selected device | `MvpUnitTest.statusBarDeviceTextReflectsSelectionAndEmptyState`；plugin.xml 注册测试；`AutoJs6ConnectionListener.selectedDeviceChanged` 实时刷新 | runIde 可补充多设备切换截图；不改变 all-devices parity commands |
 | Device reverse commands | Source uses `\u00A0cmd\u00A0` / whitelist | normalized key handling + `remoteWhitelist` | unknown command gate test | Successful reverse UI dispatch 可在 runIde 手工补充 |
 | ADB devices/forward | `adb devices -l`, forward to 7347/20347 | `AdbService.kt` parses model/product, creates forwards, timeout/provider diagnostics, cleanup | parser unit test；live manual forward to `tcp:7347` completed hello | Provider state variations require more devices for release matrix |
 | LAN/client connection | Source offers client/server LAN pickers | local IPv4 filter, copyable client-mode hint, host:port parsing, duplicate detection | host parser test | Real LAN outside emulator not yet in release matrix |

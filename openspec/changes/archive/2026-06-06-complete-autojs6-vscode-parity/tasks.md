@@ -25,6 +25,7 @@
 - [x] 3.4 将设备 log payloads 路由到 dedicated output console 或 Tool Window panel。
 - [x] 3.5 在 attach、normal disconnect、unexpected disconnect 和 reconnect 时更新 Tool Window。
 - [x] 3.6 为主要操作结果和错误增加 notifications 与 log entries。
+- [x] 3.7 增加 Status Bar connected-device widget，实时显示当前 AutoJs6 设备并允许切换 selected device；保持 all-devices parity commands 语义不变。
 
 ## 4. 项目差量同步（Project Diff Synchronization）
 

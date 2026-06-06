@@ -146,3 +146,24 @@
 - 项目同步路径已抽出 `AutoJs6ProjectSyncService.sendProjectCommand`，后台 action、CommandsHierarchy 间接路径与 Project Run Configuration 都复用同一 bytes + `bytes_command` 发送逻辑。
 - 自动化 replay 证明插件同步代码按顺序发送 bytes frame，再发送 JSON `bytes_command`，且 `save_project` / `run_project` 的 md5 与 bytes payload 匹配。
 - 对“项目已同步但未出现可见执行”的设备侧情况，不强制改成 full sync；保持 VSCode mtime diff/override/empty-diff 兼容语义，并在文档中说明需要按设备行为观察。
+
+## 阶段 14 发现：状态栏设备显示/切换优化探索
+- 现有连接服务已经具备状态栏所需核心数据：`connectedDevices()`、`deviceSnapshots()`、`selectedConnectedDevice()`、`selectDevice(key)`、`addListener/removeListener`。
+- 现有 Tool Window 可选择设备，但选择事件通过表格第 0 列 `name` 反查 snapshot；多设备同名时可能选错，建议状态栏与 Tool Window 都改用不可见/内存中的 `key` 作为选择依据。
+- 当前 listener 只包含 `deviceAttached`、`deviceDetached`、`logReceived`。如果状态栏要做到“当前设备实时性”，需要新增 `selectedDeviceChanged` 或等价通知；仅监听 attach/detach 不足以覆盖用户从 Tool Window/状态栏切换当前设备。
+- `AutoJs6ConnectionService.detach()` 会在当前设备断开时自动切到剩余第一个设备或 null，这是实现实时状态栏的良好基础，但应在自动切换后通知 UI。
+- 本地 IntelliJ 2024.2 平台包确认可注册 `<statusBarWidgetFactory id="..." implementation="..."/>`；扩展点在 `META-INF/PlatformExtensionPoints.xml`，接口为 `com.intellij.openapi.wm.StatusBarWidgetFactory`，Widget 可实现 `StatusBarWidget.MultipleTextValuesPresentation` 提供下拉列表。
+- 本轮探索中第一次使用 `jar tf` 失败，因为当前 PowerShell PATH 没有 `jar.exe`；已改用 .NET `System.IO.Compression.ZipFile` 与 JDK 21 `javap.exe` 查看平台 jar。
+
+## 阶段 15 发现：状态栏设备切换已落地
+- `src/main/resources/META-INF/plugin.xml` 已注册 `statusBarWidgetFactory id="AutoJs6DeviceStatus"`。
+- `AutoJs6DeviceStatusBarWidget` 使用 `StatusBarWidget.MultipleTextValuesPresentation` 展示当前设备，并通过 `JBPopupFactory.createListPopup` 切换设备。
+- `AutoJs6ConnectionService` 新增 selected-device change 通知；当前设备断开时自动切到剩余设备或 null，并通知 UI。
+- Tool Window 现在维护每行对应的 device `key`，刷新期间屏蔽 selection listener，避免表格重建时短暂清空 selected device。
+- 该优化只影响 shared selected device，不改变普通 run/save/project commands 发送到所有设备的 VSCode-compatible 语义。
+
+## 阶段 16 发现：OpenSpec 归档完成
+- `complete-autojs6-vscode-parity` 已归档到 `openspec/changes/archive/2026-06-06-complete-autojs6-vscode-parity/`。
+- 归档时 OpenSpec CLI 自动将 8 个 delta specs 同步到 `openspec/specs/`：新增 advanced-connection-experience、debug-and-breakpoint-parity、device-tool-window-and-logs、project-diff-sync、release-and-compatibility、remote-command-bridge、vscode-parity-actions，并更新 script-run-configuration。
+- 归档后全量校验首次发现历史主规格 `autojs6-project-template` 缺少 `## Purpose` / `## Requirements` 主规格头；已做文档头格式修复，不改变需求语义。
+- 当前 `openspec validate --all --strict` 已 11/11 passed，`openspec list --json` 无 active changes。
