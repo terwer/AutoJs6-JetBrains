@@ -8,7 +8,10 @@ import org.autojs.autojs6.jetbrains.device.FrameCodec
 import org.autojs.autojs6.jetbrains.device.JsonCodec
 import org.autojs.autojs6.jetbrains.project.AutoJs6ProjectSyncService
 import org.autojs.autojs6.jetbrains.project.AutoJs6ProjectTemplateService
+import org.autojs.autojs6.jetbrains.project.AUTOJS6_RUN_PROJECT_COMMAND
+import org.autojs.autojs6.jetbrains.project.AUTOJS6_SAVE_PROJECT_COMMAND
 import org.autojs.autojs6.jetbrains.remote.AutoJs6HttpBridgeService
+import org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationSerializer
 import org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationSerializer
 import org.autojs.autojs6.jetbrains.script.AutoJs6ScriptCommand
 import org.jdom.Element
@@ -64,12 +67,24 @@ class MvpUnitTest {
         assertEquals("", AutoJs6ScriptConfigurationSerializer.readScriptPath(element))
     }
 
+    @Test fun autoJs6ProjectConfigurationPersistsProjectRoot() {
+        val element = Element("configuration")
+        val projectRoot = "/tmp/autojs6/project"
+        AutoJs6ProjectConfigurationSerializer.writeProjectRoot(element, projectRoot)
+        assertEquals(projectRoot, AutoJs6ProjectConfigurationSerializer.readProjectRoot(element))
+
+        AutoJs6ProjectConfigurationSerializer.writeProjectRoot(element, "")
+        assertEquals("", AutoJs6ProjectConfigurationSerializer.readProjectRoot(element))
+    }
+
     @Test fun pluginXmlRegistersRunConfigurationTypeWithPlatformExtensionPoint() {
         val pluginXml = Files.readString(java.nio.file.Path.of("src/main/resources/META-INF/plugin.xml"))
 
         assertTrue(pluginXml.contains("<configurationType implementation=\"org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationType\"/>"))
+        assertTrue(pluginXml.contains("<configurationType implementation=\"org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationType\"/>"))
         assertFalse(pluginXml.contains("<runConfigurationType"))
         assertTrue(pluginXml.contains("<runConfigurationProducer implementation=\"org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationProducer\"/>"))
+        assertTrue(pluginXml.contains("<runConfigurationProducer implementation=\"org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationProducer\"/>"))
     }
 
     @Test fun pluginXmlRegistersAllVscodeParityActionsAndToolWindow() {
@@ -98,6 +113,10 @@ class MvpUnitTest {
         assertTrue(pluginXml.contains("factoryClass=\"org.autojs.autojs6.jetbrains.toolwindow.AutoJs6ToolWindowFactory\""))
         assertTrue(pluginXml.contains("group-id=\"EditorPopupMenu\""))
         assertTrue(pluginXml.contains("group-id=\"ProjectViewPopupMenu\""))
+        assertTrue(pluginXml.contains("id=\"AutoJs6.RunProject\" class=\"org.autojs.autojs6.jetbrains.actions.RunProjectAction\""))
+        assertTrue(pluginXml.contains("id=\"AutoJs6.SaveProject\" class=\"org.autojs.autojs6.jetbrains.actions.SaveProjectAction\""))
+        assertTrue(pluginXml.substringAfter("id=\"AutoJs6.RunProject\"").substringBefore("</action>").contains("group-id=\"AutoJs6.ToolbarGroup\""))
+        assertTrue(pluginXml.substringAfter("id=\"AutoJs6.SaveProject\"").substringBefore("</action>").contains("group-id=\"AutoJs6.ToolbarGroup\""))
         assertTrue(pluginXml.contains("first-keystroke=\"F6\""))
         assertTrue(pluginXml.contains("first-keystroke=\"F8\""))
     }
@@ -146,6 +165,7 @@ class MvpUnitTest {
         assertEquals(400, bridge.handleExecForTest(null, null, null).first)
         assertEquals(400, bridge.handleExecForTest("formatDisk", null, null).first)
         assertEquals(400, bridge.handleExecForTest("run", "C:/fixture/main.js", null).first)
+        assertEquals(400, bridge.handleExecForTest("rerunProject", "C:/fixture/AutoJs6Project", null).first)
     }
 
     @Test fun projectSyncBuildsZipMd5IgnoresAndTracksDeletedFiles() {
@@ -192,6 +212,83 @@ class MvpUnitTest {
             }
         }
         return names
+    }
+
+    @Test fun projectSyncSendsRealBytesCommandFramesForRunAndSave() {
+        val dir = Files.createTempDirectory("autojs6-project-frames")
+        val server = ServerSocket(0)
+        val attached = CountDownLatch(1)
+        lateinit var ideDevice: org.autojs.autojs6.jetbrains.device.AutoJs6Device
+        try {
+            Files.writeString(dir.resolve("project.json"), """{"name":"Demo","ignore":[]}""")
+            Files.writeString(dir.resolve("main.js"), "toast('project')")
+
+            val acceptThread = Thread {
+                val accepted = server.accept()
+                ideDevice = org.autojs.autojs6.jetbrains.device.AutoJs6Device(
+                    accepted,
+                    { attached.countDown() },
+                    {},
+                    null
+                )
+            }
+            acceptThread.isDaemon = true
+            acceptThread.start()
+
+            val client = Socket("127.0.0.1", server.localPort)
+            val codec = FrameCodec()
+            fun sendClientJson(value: Map<String, Any?>) {
+                client.getOutputStream().write(codec.encode(AutoJs6Constants.TYPE_JSON, JsonCodec.encode(value)))
+                client.getOutputStream().flush()
+            }
+            fun readFrame(): Pair<Int, ByteArray> {
+                val header = client.getInputStream().readNBytes(8)
+                val buffer = java.nio.ByteBuffer.wrap(header)
+                val payloadLen = buffer.int
+                val type = buffer.int
+                return type to client.getInputStream().readNBytes(payloadLen)
+            }
+
+            sendClientJson(mapOf("id" to 1, "type" to "hello", "data" to mapOf(
+                "device_name" to "ProjectReplayDevice",
+                "app_version" to "6.7.0",
+                "app_version_code" to "3591",
+                "device_id" to "replay-project"
+            )))
+            assertTrue(attached.await(3, TimeUnit.SECONDS))
+            val hello = readFrame()
+            assertEquals(AutoJs6Constants.TYPE_JSON, hello.first)
+            assertEquals("hello", JsonCodec.decode(hello.second).string("type"))
+
+            val service = AutoJs6ProjectSyncService()
+            val saveResult = service.sendProjectCommand(dir, AUTOJS6_SAVE_PROJECT_COMMAND, listOf(ideDevice))
+            assertEquals(1, saveResult.sent)
+            val saveBytes = readFrame()
+            val saveJson = readFrame()
+            assertEquals(AutoJs6Constants.TYPE_BYTES, saveBytes.first)
+            assertEquals(AutoJs6Constants.TYPE_JSON, saveJson.first)
+            val savePayload = JsonCodec.decode(saveJson.second)
+            assertEquals("bytes_command", savePayload.string("type"))
+            assertEquals(AUTOJS6_SAVE_PROJECT_COMMAND, savePayload.obj("data")?.string("command"))
+            assertEquals(AutoJs6ProjectSyncService.md5Hex(saveBytes.second), savePayload.string("md5"))
+
+            val runResult = service.sendProjectCommand(dir, AUTOJS6_RUN_PROJECT_COMMAND, listOf(ideDevice))
+            assertEquals(1, runResult.sent)
+            val runBytes = readFrame()
+            val runJson = readFrame()
+            assertEquals(AutoJs6Constants.TYPE_BYTES, runBytes.first)
+            assertEquals(AutoJs6Constants.TYPE_JSON, runJson.first)
+            val runPayload = JsonCodec.decode(runJson.second)
+            assertEquals("bytes_command", runPayload.string("type"))
+            assertEquals(AUTOJS6_RUN_PROJECT_COMMAND, runPayload.obj("data")?.string("command"))
+            assertEquals(AutoJs6ProjectSyncService.md5Hex(runBytes.second), runPayload.string("md5"))
+
+            ideDevice.close()
+            client.close()
+        } finally {
+            server.close()
+            dir.toFile().deleteRecursively()
+        }
     }
 
     @Test fun autoJs6ScriptRunConfigurationPayloadMatchesRunCurrentFilePayloadInReplay() {

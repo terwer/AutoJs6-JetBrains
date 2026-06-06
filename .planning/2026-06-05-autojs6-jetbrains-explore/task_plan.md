@@ -3,7 +3,8 @@
 ## 目标
 在不开始写业务代码的前提下，探索 `AutoJs6-VSCode-Extension` 的功能、入口和迁移边界，并为 `AutoJs6-JetBrains` 制定可执行的 JetBrains 插件开发计划。
 
-## 当前阶段`r`n阶段 4
+## 当前阶段
+阶段 13
 
 ## 各阶段
 
@@ -118,3 +119,21 @@
 - [x] 勾选 `complete-autojs6-vscode-parity` 任务 0.1～1.4
 - **状态：** complete
 
+### 阶段 12：审计人工测试反馈并阻止误归档
+- [x] 审计 Tools 菜单、Project View、Toolbar、CommandsHierarchy、Run Configuration 的源码入口
+- [x] 对照 VSCode `editor/title` / `explorer/context` 与项目 `bytes_command` 发送逻辑
+- [x] 判断用户反馈：Tools 菜单项目运行/保存可用；Toolbar 缺项目运行/保存；CommandsHierarchy 项目运行缺端到端执行证据；Run Configuration 缺项目类型
+- [x] 将 `complete-autojs6-vscode-parity` 中错误勾选/证据不足的任务重新打开
+- [x] 更新 `docs/vscode-parity-matrix.md` 与 `docs/compatibility-ledger.md`，记录 2026-06-06 人工回归阻断项
+- **状态：** complete
+
+### 阶段 13：实现人工审计阻断项
+- [x] 按 `complete-autojs6-vscode-parity` apply 流程读取 status、instructions、proposal、design、specs、tasks
+- [x] 补齐 Toolbar / editor-title 等效入口：`Run Project` 与 `Save Project` 加入 `AutoJs6.ToolbarGroup`
+- [x] 实现 `AutoJs6 Project` Run Configuration：type、factory、producer、settings editor、serializer、run profile state
+- [x] 抽出可测试的 `AutoJs6ProjectSyncService.sendProjectCommand`，让项目同步路径可做 frame-level replay
+- [x] 增加自动化测试：项目 Run Configuration 注册/序列化、Toolbar 注册、project bytes frame + `bytes_command` run/save replay
+- [x] 同步 OpenSpec delta：新增 `script-run-configuration` 对 `AutoJs6 Project` Run Configuration 的规格变更，移除 deferred 要求
+- [x] 更新 parity matrix、compatibility ledger、usage docs 和 tasks，68/68 tasks complete
+- [x] 验证通过：`test --rerun-tasks`、`openspec validate --strict`、`check`、`buildPlugin`、IDE build、`git diff --check`
+- **状态：** complete

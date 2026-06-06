@@ -294,7 +294,7 @@ Shift + F10
 
 项目运行边界：
 
-- 当前不注册 `AutoJs6 Project` Run Configuration；项目操作通过 VSCode parity actions 完成。
+- 当前注册 `AutoJs6 Project` Run Configuration；项目操作也可通过 VSCode parity actions 完成。
 - `Run Project` / `Save Project` 会从当前文件、Project View 选中目录/文件或项目根目录解析 `project.json`。
 - 有效项目会在后台任务中计算 mtime diff，按相对路径 zip modified files，计算 zip bytes 的 md5，先发送 bytes payload，再发送 JSON `bytes_command`。
 - 缺少 `project.json`、zip/md5/bytes 发送失败或无连接设备时会报错，不显示假成功。
@@ -304,7 +304,9 @@ Shift + F10
 ```text
 Tools → AutoJs6 → 运行项目 (Run Project)
 Tools → AutoJs6 → 保存项目 (Save Project)
+Main Toolbar → AutoJs6 → Run Project / Save Project
 Project View folder context → AutoJs6 → Run Project / Save Project
+Run | Edit Configurations... → AutoJs6 Project
 ```
 
 已记录的实机协议验证：
@@ -391,6 +393,7 @@ adb devices -l
 7. 验证 toast 或脚本行为
 8. 验证 Save / Stop / Stop All
 9. 验证 AutoJs6 Script Run Configuration 可创建并运行单个 .js 文件
+9b. 验证 AutoJs6 Project Run Configuration 可创建并运行包含 project.json 的项目
 10. 验证 New Project 生成 project.json
 11. 验证 Run Project / Save Project 对有效 project.json 项目发送 bytes_command
 ```

@@ -132,3 +132,17 @@
 - HTTP `/exec` 源行为是 `0.0.0.0:10347`，JetBrains 设计仍坚持默认 disabled 或 loopback-bound，wide binding 只能作为明确 compatibility mode。
 - 协议 fixtures 已覆盖 frame header、JSON/bytes type、hello、run command、log、bytes_command、device reverse command；其中 sample bytes 仅用于 replay framing，不代表项目同步完成。
 
+## 阶段 12 发现：人工测试反馈深度审计
+- `plugin.xml` 中 `AutoJs6.RunProject` / `AutoJs6.SaveProject` 只加入了 `AutoJs6.Group` 与 `AutoJs6.ProjectPopupGroup`，没有加入 `AutoJs6.ToolbarGroup`；而 VSCode `editor/title` 明确包含 `runProjectWithoutArguments` 与 `saveProjectWithoutArguments`。因此“右上角 icon 缺运行项目/保存项目”属实。
+- Tools 菜单路径：`AutoJs6.Group` 挂到 `ToolsMenu`，`RunProject` / `SaveProject` 动作也加入该 group；这解释了“项目上点击菜单 -> AutoJs6 -> 运行项目/保存项目功能正常”。
+- CommandsHierarchy 路径：`showCommandsHierarchy()` 第 8/9 项直接调用 `sendProjectCommand(project, null, null, run_project/save_project)`，会用当前编辑器或 `project.basePath` 自动解析 `project.json`；但它不携带菜单事件/Project View 选中目录，也不等待设备侧执行效果。结合用户实测“已发送但未真正运行”，该路径不能算端到端完成。
+- Run Configuration 当前只有 `AutoJs6 Script`：`AutoJs6ScriptSettingsEditor` 文案直接写着“项目 Run Configuration 尚未实现”，producer 只接受本地 `.js` 文件。因此“看不到/无法添加运行项目 Run Configuration”属实，且是明确缺口。
+- JetBrains 项目同步发送顺序与 VSCode 结构基本一致：先 bytes zip，再 `bytes_command` JSON，字段包含 `id/name/deletedFiles/override/command` 与 top-level `md5`；但当前可见实机证据主要是 raw ADB replay，绕过了插件 UI，不能替代 `runIde` 插件路径验收。
+- `complete-autojs6-vscode-parity/tasks.md` 中 2.2、2.6、4.10、7.2、7.3、9.4 原先勾选过早；已重新打开，并新增 10.x 人工审计阻断项。
+
+## 阶段 13 发现：人工审计阻断项已实现
+- Toolbar 缺项目运行/保存已修复：`AutoJs6.RunProject` 与 `AutoJs6.SaveProject` 已加入 `AutoJs6.ToolbarGroup`。
+- `AutoJs6 Project` Run Configuration 已实现，不再作为例外：配置保存项目根目录，校验 `project.json`，运行时发送 `run_project` project bytes command。
+- 项目同步路径已抽出 `AutoJs6ProjectSyncService.sendProjectCommand`，后台 action、CommandsHierarchy 间接路径与 Project Run Configuration 都复用同一 bytes + `bytes_command` 发送逻辑。
+- 自动化 replay 证明插件同步代码按顺序发送 bytes frame，再发送 JSON `bytes_command`，且 `save_project` / `run_project` 的 md5 与 bytes payload 匹配。
+- 对“项目已同步但未出现可见执行”的设备侧情况，不强制改成 full sync；保持 VSCode mtime diff/override/empty-diff 兼容语义，并在文档中说明需要按设备行为观察。

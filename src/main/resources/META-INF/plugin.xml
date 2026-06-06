@@ -11,7 +11,9 @@
     <extensions defaultExtensionNs="com.intellij">
         <notificationGroup id="AutoJs6 Notifications" displayType="BALLOON"/>
         <configurationType implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationType"/>
+        <configurationType implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationType"/>
         <runConfigurationProducer implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationProducer"/>
+        <runConfigurationProducer implementation="org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationProducer"/>
         <toolWindow id="AutoJs6" anchor="right" factoryClass="org.autojs.autojs6.jetbrains.toolwindow.AutoJs6ToolWindowFactory"/>
     </extensions>
 
@@ -106,6 +108,7 @@
         <action id="AutoJs6.SaveProject" class="org.autojs.autojs6.jetbrains.actions.SaveProjectAction" text="保存项目 (Save Project)">
             <add-to-group group-id="AutoJs6.Group" anchor="last"/>
             <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ToolbarGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 6" second-keystroke="S"/>
         </action>
         <action id="AutoJs6.SaveProjectWithoutArguments" class="org.autojs.autojs6.jetbrains.actions.SaveProjectWithoutArgumentsAction" text="保存当前项目（无参数）(Save Current Project)">
@@ -115,6 +118,7 @@
         <action id="AutoJs6.RunProject" class="org.autojs.autojs6.jetbrains.actions.RunProjectAction" text="运行项目 (Run Project)">
             <add-to-group group-id="AutoJs6.Group" anchor="last"/>
             <add-to-group group-id="AutoJs6.ProjectPopupGroup" anchor="last"/>
+            <add-to-group group-id="AutoJs6.ToolbarGroup" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="alt F6"/>
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt 6" second-keystroke="R"/>
         </action>

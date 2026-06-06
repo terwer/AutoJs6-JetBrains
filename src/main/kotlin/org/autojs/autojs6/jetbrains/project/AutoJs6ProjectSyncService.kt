@@ -48,6 +48,11 @@ data class AutoJs6ProjectDiffPayload(
     )
 }
 
+data class AutoJs6ProjectSyncResult(
+    val sent: Int,
+    val failures: List<String>
+)
+
 private data class FileStamp(val relativePath: String, val lastModifiedMillis: Long)
 private data class ProjectSyncState(var syncedOnce: Boolean = false, var files: MutableMap<String, FileStamp> = linkedMapOf())
 
@@ -63,27 +68,40 @@ class AutoJs6ProjectSyncService {
         ProgressManager.getInstance().run(object : Task.Backgroundable(project, "AutoJs6 Project Sync", true) {
             override fun run(indicator: ProgressIndicator) {
                 indicator.text = "Preparing AutoJs6 project diff"
-                var sent = 0
-                devices.forEachIndexed { index, device ->
+                val result = sendProjectCommand(root, command, devices) { index, device ->
                     indicator.checkCanceled()
                     indicator.fraction = index.toDouble() / devices.size.coerceAtLeast(1)
                     indicator.text2 = "${device.deviceName} (${device.endpoint()})"
-                    try {
-                        val payload = buildPayload(root, device.key())
-                        indicator.checkCanceled()
-                        device.sendBytes(payload.zipBytes)
-                        device.sendBytesCommand(payload.md5, payload.commandData(command))
-                        sent++
-                    } catch (t: Throwable) {
-                        AutoJs6Notifier.error(project, "Project sync 到 ${device.endpoint()} 失败: ${t.message}")
-                    }
                 }
                 indicator.fraction = 1.0
-                if (sent > 0) {
-                    AutoJs6Notifier.info(project, "AutoJs6 project command=$command 已发送到 $sent 个设备")
+                result.failures.forEach { AutoJs6Notifier.error(project, it) }
+                if (result.sent > 0) {
+                    AutoJs6Notifier.info(project, "AutoJs6 project command=$command 已发送到 ${result.sent} 个设备")
                 }
             }
         })
+    }
+
+    fun sendProjectCommand(
+        root: Path,
+        command: String,
+        devices: List<AutoJs6Device>,
+        beforeDevice: ((Int, AutoJs6Device) -> Unit)? = null
+    ): AutoJs6ProjectSyncResult {
+        var sent = 0
+        val failures = mutableListOf<String>()
+        devices.forEachIndexed { index, device ->
+            beforeDevice?.invoke(index, device)
+            try {
+                val payload = buildPayload(root, device.key())
+                device.sendBytes(payload.zipBytes)
+                device.sendBytesCommand(payload.md5, payload.commandData(command))
+                sent++
+            } catch (t: Throwable) {
+                failures += "Project sync 到 ${device.endpoint()} 失败: ${t.message}"
+            }
+        }
+        return AutoJs6ProjectSyncResult(sent, failures)
     }
 
     fun buildPayload(root: Path, deviceKey: String): AutoJs6ProjectDiffPayload = buildPayloadWithState(root, stateKey(root, deviceKey))

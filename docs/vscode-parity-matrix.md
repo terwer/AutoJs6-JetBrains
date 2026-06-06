@@ -2,6 +2,12 @@
 
 本文档是 `complete-autojs6-vscode-parity` 的验收矩阵。状态只按当前代码和已记录证据填写；无法验证的发布/IDE-family 项保持 open，不用推测结果冒充完成。
 
+## 2026-06-06 人工回归审计与修复结论
+
+- 已补齐右上 Toolbar/editor-title 等效入口：`Run Project` / `Save Project` 现在加入 `AutoJs6.ToolbarGroup`。
+- 已注册 `AutoJs6 Project` Run Configuration，可在 `Run | Edit Configurations...` 中创建，运行时复用 project diff/zip/md5/`bytes_command.command=run_project` 语义。
+- `CommandsHierarchy -> Run Project/Save Project` 仍按同一 `sendProjectCommand` 路径发送；自动化 replay 已覆盖插件项目同步代码发送 bytes frame 后再发送 `bytes_command`。若设备端对“项目已同步但未显式重新执行”没有可见效果，不强制改变 VSCode 兼容 diff 语义。
+
 ## 证据来源
 
 - 源扩展：`D:/Users/Administrator/Documents/myproject/AutoJs6-VSCode-Extension/package.json`
@@ -39,10 +45,10 @@
 | 12 | `extension.saveToDevice` | `AutoJs6.SaveToDevice` | Tools, editor popup, Project View popup | Selected-device save only | `AutoJs6ConnectionService.sendCommandToDevice` |
 | 13 | `extension.newUntitledFile` | `AutoJs6.NewUntitledFile` | Tools, editor popup | Opens writable unsaved `LightVirtualFile` document | `AutoJs6ActionSupport.newUntitledFile` |
 | 14 | `extension.newProject` | `AutoJs6.NewProject` | Tools, Project View popup; `Ctrl+Alt+6`, `N` | Creates a new project from bundled template; no existing-project migration | `AutoJs6ProjectTemplateService`; template test |
-| 15 | `extension.saveProject` | `AutoJs6.SaveProject` | Tools, Project View popup; `Ctrl+Alt+6`, `S` | Project diff zip bytes first, then `bytes_command.command=save_project` | `AutoJs6ProjectSyncService`; unit test; live ADB replay |
-| 16 | `extension.saveProjectWithoutArguments` | `AutoJs6.SaveProjectWithoutArguments` | Tools, editor popup | Resolves project root from current context; refuses missing `project.json` | `AutoJs6ActionSupport.resolveProjectRoot` |
-| 17 | `extension.runProject` | `AutoJs6.RunProject` | Tools, Project View popup; `Alt+F6`; `Ctrl+Alt+6`, `R` | Project diff zip bytes first, then `bytes_command.command=run_project` | `AutoJs6ProjectSyncService`; unit test; live ADB replay |
-| 18 | `extension.runProjectWithoutArguments` | `AutoJs6.RunProjectWithoutArguments` | Tools, editor popup | Resolves current project root; refuses missing `project.json` | `AutoJs6ActionSupport.resolveProjectRoot` |
+| 15 | `extension.saveProject` | `AutoJs6.SaveProject` | Tools, toolbar, Project View popup; `Ctrl+Alt+6`, `S` | Project diff zip bytes first, then `bytes_command.command=save_project` | `AutoJs6ProjectSyncService`; `projectSyncSendsRealBytesCommandFramesForRunAndSave`; raw ADB replay |
+| 16 | `extension.saveProjectWithoutArguments` | `AutoJs6.SaveProjectWithoutArguments` | Tools, editor popup; toolbar-equivalent via `AutoJs6.SaveProject` | Resolves project root from current context; refuses missing `project.json` | `AutoJs6ActionSupport.resolveProjectRoot`; toolbar registration test |
+| 17 | `extension.runProject` | `AutoJs6.RunProject` | Tools, toolbar, Project View popup; `Alt+F6`; `Ctrl+Alt+6`, `R` | Project diff zip bytes first, then `bytes_command.command=run_project` | `AutoJs6ProjectSyncService`; `projectSyncSendsRealBytesCommandFramesForRunAndSave`; raw ADB replay |
+| 18 | `extension.runProjectWithoutArguments` | `AutoJs6.RunProjectWithoutArguments` | Tools, editor popup; toolbar-equivalent via `AutoJs6.RunProject` | Resolves current project root; refuses missing `project.json` | `AutoJs6ActionSupport.resolveProjectRoot`; toolbar registration test |
 
 ## Protocol / project evidence
 
@@ -56,7 +62,7 @@
 | Ignore filtering | `project.json.ignore` normalized and filtered using resolved path handling | `projectSyncBuildsZipMd5IgnoresAndTracksDeletedFiles` |
 | mtime diff/deleted | Per root/device state tracks modified/deleted relative paths | `projectSyncBuildsZipMd5IgnoresAndTracksDeletedFiles` |
 | Zip/md5 | Modified files zipped by relative path, md5 over zip bytes | `projectSyncBuildsZipMd5IgnoresAndTracksDeletedFiles` |
-| bytes ordering | Send bytes frame before JSON `bytes_command` | `AutoJs6ProjectSyncService.runProjectSyncInBackground`; live ADB replay sent `save_project` then `run_project` |
+| bytes ordering | Send bytes frame before JSON `bytes_command` | `AutoJs6ProjectSyncService.runProjectSyncInBackground`; `projectSyncSendsRealBytesCommandFramesForRunAndSave`; raw ADB replay sent `save_project` then `run_project` |
 
 ## Breakpoint parity row
 
@@ -70,8 +76,16 @@
 |---|---|---|---|
 | HTTP bridge binding | VSCode listens on `0.0.0.0:10347` | JetBrains default is disabled / loopback-safe; wider binding requires explicit compatibility mode | `AutoJs6SettingsService` HTTP fields; `AutoJs6HttpBridgeService.start`; unknown commands return 400 |
 | Shortcuts | VSCode contributes F6/F8 and chords directly | JetBrains registers suggested keymap metadata; users may override conflicts | `plugin.xml` shortcuts; task 2 tests inspect F6/F8/chords |
-| Run Configuration | VSCode has no JetBrains Run Configuration | `AutoJs6 Script` is additive and does not replace any VSCode command row | Existing Run Configuration payload replay test |
+| Run Configuration | VSCode has no JetBrains Run Configuration | `AutoJs6 Script` and `AutoJs6 Project` are JetBrains-native additive run entries that reuse the same script/project command protocols | Existing script Run Configuration payload replay test; project configuration registration/serializer tests |
 | Tool Window/Diagnostics | VSCode uses output channel and quick picks | JetBrains adds Tool Window/device table/diagnostics as additive helpers | `AutoJs6ToolWindowFactory`, `DiagnosticsSummaryAction` |
+
+## Manual regression blockers and resolution
+
+| Blocker | Evidence | Required before archive |
+|---|---|---|
+| Toolbar project actions | Fixed: `AutoJs6.RunProject` / `AutoJs6.SaveProject` now join `AutoJs6.ToolbarGroup` | `pluginXmlRegistersAllVscodeParityActionsAndToolWindow` verifies toolbar registration |
+| CommandsHierarchy project run/save not proven | Mitigated: same `sendProjectCommand` path now has frame-level replay coverage through `AutoJs6ProjectSyncService.sendProjectCommand` | If a device does not visibly execute an already-synchronized project, keep VSCode-compatible diff semantics and document device behavior rather than forcing an incompatible full sync |
+| Project Run Configuration | Fixed: `AutoJs6ProjectConfigurationType`, producer, settings editor, run profile state registered | `pluginXmlRegistersRunConfigurationTypeWithPlatformExtensionPoint`; project serializer test |
 
 ## Release-blocking gate
 

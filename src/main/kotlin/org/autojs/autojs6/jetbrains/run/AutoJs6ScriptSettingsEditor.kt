@@ -22,7 +22,7 @@ class AutoJs6ScriptSettingsEditor(private val project: Project) : SettingsEditor
     init {
         val descriptor = FileChooserDescriptorFactory.createSingleFileDescriptor("js")
             .withTitle("选择 AutoJs6 JS 脚本")
-            .withDescription("选择一个本地 .js 文件；项目 Run Configuration 尚未实现。")
+            .withDescription("选择一个本地 .js 文件；如需运行项目，请创建 AutoJs6 Project Run Configuration。")
         scriptPathField.addActionListener {
             val selected = FileChooser.chooseFile(descriptor, project, null)
             if (selected != null) {

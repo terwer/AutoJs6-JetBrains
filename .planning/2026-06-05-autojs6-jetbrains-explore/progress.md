@@ -278,3 +278,44 @@
   - `openspec validate add-autojs6-script-run-configuration --strict`：通过。
   - `./gradlew.bat --no-daemon --console=plain test`：通过。
 
+### 阶段 12：人工测试反馈深度审计
+- **状态：** complete
+- **时间：** 2026-06-06 11:39-11:55 Asia/Shanghai
+- 执行的操作：
+  - 恢复活跃规划上下文与 git 状态；初始业务代码工作区干净。
+  - 审计 `plugin.xml`、`AutoJs6Actions.kt`、`AutoJs6CommandDispatcher.kt`、`AutoJs6ProjectSyncService.kt`、`AutoJs6ConnectionService.kt`、Run Configuration 相关类。
+  - 对照源 VSCode `package.json`、`device.ts`、`extension.ts`、`project.ts`、`diff.ts` 的项目运行/保存与菜单入口。
+  - 更新 `openspec/changes/complete-autojs6-vscode-parity/tasks.md`：重新打开证据不足或被人工测试推翻的任务，并新增 2026-06-06 阻断项。
+  - 更新 `docs/vscode-parity-matrix.md` 与 `docs/compatibility-ledger.md`：记录 Toolbar 缺口、CommandsHierarchy 端到端缺口、Project Run Configuration 缺口。
+  - 更新 `task_plan.md` 阶段 12 为 complete。
+- 验证结果：
+  - `openspec validate complete-autojs6-vscode-parity --strict`：通过。
+- 结论：用户反馈基本正确，`complete-autojs6-vscode-parity` 不能归档。
+- 错误日志：
+  - 第一次 PowerShell `ShowRange` 函数输出 `$path:$start` 因冒号解析失败；改用 `-f` 格式化字符串后继续。
+  - 第一次尝试在 PowerShell 使用 Bash 风格 `python - <<'PY'` 失败；改为 PowerShell here-string pipe 给 Python。
+  - 第一次用 PowerShell 双引号 here-string 记录 Markdown 代码反引号，导致 `` `e`` / `` `b`` 被解释成控制字符；已用 `git show HEAD:<path>` 重建规划文件并重新追加干净记录。
+
+### 阶段 13：实现人工审计阻断项
+- **状态：** complete
+- **时间：** 2026-06-06 12:00-12:15 Asia/Shanghai
+- 执行的操作：
+  - 使用 `openspec-apply-change` 读取 `complete-autojs6-vscode-parity` status、apply instructions 和全部 context files。
+  - 修改 `plugin.xml`，注册 `AutoJs6ProjectConfigurationType` / `AutoJs6ProjectConfigurationProducer`，并将 `RunProject` / `SaveProject` 加入 Toolbar group。
+  - 新增项目 Run Configuration 相关代码：`AutoJs6ProjectConfigurationType`、`AutoJs6ProjectRunConfiguration`、`AutoJs6ProjectConfigurationProducer`、`AutoJs6ProjectSettingsEditor`、`AutoJs6ProjectRunProfileState`、`AutoJs6ProjectConfigurationSerializer`。
+  - 调整 `AutoJs6ProjectSyncService`，抽出同步可测的 `sendProjectCommand`，供后台 action 与项目 Run Configuration 复用。
+  - 更新 `AutoJs6ScriptSettingsEditor` 文案，指向新的 `AutoJs6 Project` Run Configuration。
+  - 增加 `MvpUnitTest` 覆盖项目配置序列化、Project Run Configuration 注册、Toolbar project actions、project bytes frame + `bytes_command` run/save replay、HTTP rerunProject gate。
+  - 新增 OpenSpec delta `openspec/changes/complete-autojs6-vscode-parity/specs/script-run-configuration/spec.md`，移除 deferred 项并新增 project run configuration 要求。
+  - 更新 `docs/vscode-parity-matrix.md`、`docs/compatibility-ledger.md`、`docs/usage-and-testing.md` 与 `tasks.md`；OpenSpec apply progress 达到 68/68。
+- 验证结果：
+  - 第一次 `test --rerun-tasks` 120s 超时，无有效输出；改用 300s 超时继续。
+  - 第二次编译失败，根因为 `AutoJs6ProjectSyncResult` 插入位置打断 `commandData()` 结束括号；已修复。
+  - `./gradlew.bat --no-daemon --console=plain test --rerun-tasks`：通过。
+  - `openspec validate complete-autojs6-vscode-parity --strict`：通过。
+  - `openspec instructions apply --change complete-autojs6-vscode-parity --json`：68/68 complete，state=all_done。
+  - `./gradlew.bat --no-daemon --console=plain check`：通过。
+  - `./gradlew.bat --no-daemon --console=plain buildPlugin`：通过，ZIP `build/distributions/AutoJs6-JetBrains-0.1.0.zip` 已生成。
+  - IDE `build_project`：通过，`problems=[]`。
+  - `git diff --check`：通过。
+- 说明：对“项目已同步但设备没有可见执行效果”的情况，当前保持 VSCode-compatible diff/bytes_command 语义，不强制改成 full sync；如设备端不支持无变更触发可见执行，应记录为设备行为而不是改协议。
