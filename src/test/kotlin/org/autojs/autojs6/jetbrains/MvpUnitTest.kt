@@ -241,6 +241,56 @@ class MvpUnitTest {
         }
     }
 
+    @Test fun projectSyncOverridePayloadIncludesFullCurrentProjectWhenOnlyNonEntryFileChanges() {
+        val dir = Files.createTempDirectory("autojs6-project-sync-full-override")
+        try {
+            Files.writeString(dir.resolve("project.json"), """{"name":"Demo","ignore":[]}""")
+            Files.writeString(dir.resolve("main.js"), "require('./lib/helper.js')")
+            val lib = dir.resolve("lib")
+            Files.createDirectories(lib)
+            val helper = lib.resolve("helper.js")
+            Files.writeString(helper, "toast('v1')")
+
+            val service = AutoJs6ProjectSyncService()
+            val first = service.buildPayload(dir, "device-1")
+            assertFalse(first.override)
+            assertTrue(zipEntries(first.zipBytes).contains("main.js"))
+
+            Files.writeString(helper, "toast('v2')")
+            Files.setLastModifiedTime(helper, FileTime.fromMillis(Files.getLastModifiedTime(helper).toMillis() + 2000))
+            val second = service.buildPayload(dir, "device-1")
+
+            assertTrue(second.override)
+            assertEquals(listOf("lib/helper.js"), second.modifiedFiles)
+            val entries = zipEntries(second.zipBytes)
+            assertTrue(entries.contains("project.json"))
+            assertTrue(entries.contains("main.js"))
+            assertTrue(entries.contains("lib/helper.js"))
+        } finally {
+            dir.toFile().deleteRecursively()
+        }
+    }
+
+    @Test fun projectSyncOverridePayloadDoesNotSendEmptyZipWhenNoFilesChanged() {
+        val dir = Files.createTempDirectory("autojs6-project-sync-no-change")
+        try {
+            Files.writeString(dir.resolve("project.json"), """{"name":"Demo","ignore":[]}""")
+            Files.writeString(dir.resolve("main.js"), "toast('project')")
+
+            val service = AutoJs6ProjectSyncService()
+            service.buildPayload(dir, "device-1")
+            val second = service.buildPayload(dir, "device-1")
+
+            assertTrue(second.override)
+            assertEquals(emptyList(), second.modifiedFiles)
+            val entries = zipEntries(second.zipBytes)
+            assertTrue(entries.contains("project.json"))
+            assertTrue(entries.contains("main.js"))
+        } finally {
+            dir.toFile().deleteRecursively()
+        }
+    }
+
     private fun zipEntries(bytes: ByteArray): List<String> {
         val names = mutableListOf<String>()
         ZipInputStream(bytes.inputStream()).use { zip ->

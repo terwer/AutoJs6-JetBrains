@@ -175,6 +175,7 @@ object AutoJs6ActionSupport {
             AutoJs6Notifier.error(project, "需要 AutoJs6 project：当前上下文缺少 project.json")
             return
         }
+        FileDocumentManager.getInstance().saveAllDocuments()
         val devices = service<AutoJs6ConnectionService>().connectedDevices()
         AutoJs6ProjectSyncService.getInstance().runProjectSyncInBackground(project, root, command, devices)
     }

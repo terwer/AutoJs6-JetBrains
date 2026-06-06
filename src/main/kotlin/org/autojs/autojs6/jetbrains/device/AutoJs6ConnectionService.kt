@@ -114,7 +114,7 @@ class AutoJs6Device(
 
     private fun sendHello(error: String? = null): Int {
         val id = ids.getAndIncrement()
-        val data = linkedMapOf<String, Any?>("extensionVersion" to "0.1.0")
+        val data = linkedMapOf<String, Any?>("extensionVersion" to AutoJs6Constants.PLUGIN_VERSION)
         if (error != null) data["errorMessage"] = error
         sendJson(mapOf("id" to id, "type" to "hello", "data" to data))
         return id

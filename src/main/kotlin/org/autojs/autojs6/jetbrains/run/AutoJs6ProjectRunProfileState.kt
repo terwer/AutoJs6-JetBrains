@@ -6,6 +6,7 @@ import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.process.ProcessOutputTypes
 import com.intellij.execution.runners.ProgramRunner
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import org.autojs.autojs6.jetbrains.AutoJs6Notifier
 import org.autojs.autojs6.jetbrains.device.AutoJs6Device
@@ -30,6 +31,7 @@ private class AutoJs6ProjectProcessHandler(
     private val projectRootPath: String
 ) : AutoJs6LogTailingProcessHandler(project, "AutoJs6 Project") {
     override fun executeRun() {
+        FileDocumentManager.getInstance().saveAllDocuments()
         val root = AutoJs6ProjectRunConfiguration.resolveProjectRoot(projectRootPath)
             ?: throw IllegalStateException("请选择包含 project.json 的 AutoJs6 项目目录")
 

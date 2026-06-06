@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.1 - Project Run Sync Fix
+
+- Fixed JetBrains project Run/Save becoming invalid after the first project execution.
+- Project commands now save pending IDE document changes before syncing, so project runs use the latest edited code.
+- Second-and-later project syncs now send a complete current project archive when using override mode, preventing AutoJs6 remote project cache errors such as missing `main.js`.
+
 ## v0.1.0 - Initial Release
 
 AutoJs6 JetBrains v0.1.0 is the first public release of the AutoJs6 plugin for JetBrains IDEs. It brings the AutoJs6 VSCode workflow to the IntelliJ Platform with native IDE actions, Run Configurations, device connectivity, project sync, logs, diagnostics, and release-ready metadata.

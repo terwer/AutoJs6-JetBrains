@@ -1,6 +1,7 @@
 package org.autojs.autojs6.jetbrains
 
 object AutoJs6Constants {
+    const val PLUGIN_VERSION = "0.1.1"
     const val IDE_LISTENING_PORT = 6347
     const val SERVER_PORT = 7347
     const val ADB_SERVER_PORT = 20347

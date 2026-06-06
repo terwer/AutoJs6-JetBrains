@@ -136,14 +136,16 @@ class AutoJs6ProjectSyncService {
 
         val deleted = previous.values.map { it.relativePath }.sorted()
         val sortedModified = modified.sorted()
-        val zip = zipModifiedFiles(normalizedRoot, sortedModified)
+        val override = state.syncedOnce
+        val zipEntries = if (override) current.values.map { it.relativePath }.sorted() else sortedModified
+        val zip = zipModifiedFiles(normalizedRoot, zipEntries)
         val payload = AutoJs6ProjectDiffPayload(
             root = normalizedRoot,
             modifiedFiles = sortedModified,
             deletedFiles = deleted,
             zipBytes = zip,
             md5 = md5Hex(zip),
-            override = state.syncedOnce
+            override = override
         )
         state.files = current
         state.syncedOnce = true
