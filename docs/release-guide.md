@@ -43,7 +43,7 @@
 | Description | 说明它是 AutoJs6 的 JetBrains IDE 插件，可连接 Android 设备，运行/保存/停止脚本，同步 AutoJs6 项目，查看日志和创建项目模板。不要写“仅 IDEA”。 |
 | Website | `https://terwer.space` |
 | Source code | `https://github.com/terwer/AutoJs6-JetBrains` |
-| License | 与仓库 `LICENSE` 保持一致 |
+| License | GNU General Public License v3.0（GPL-3.0），与仓库 `LICENSE` 保持一致 |
 | Tags | `autojs`, `autojs6`, `android`, `javascript`, `automation`, `jetbrains` |
 | Vendor email | `youweics@163.com` |
 | Compatible products | 面向 JetBrains IDE family；具体已验证产品以 `docs/release-compatibility-matrix.md` 为准 |
@@ -244,7 +244,7 @@ INTELLIJ_SIGN_PRIVATE_KEY_PASSWORD
    - Repository / Source Code：`https://github.com/terwer/AutoJs6-JetBrains`
    - Website：`https://terwer.space`
    - Email：`youweics@163.com`
-   - License：与仓库一致
+   - License：GNU General Public License v3.0（GPL-3.0），与仓库一致
    - Tags：见第 2 节
 7. 填写 release notes / change notes。
 8. 选择发布渠道：

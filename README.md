@@ -1,6 +1,3 @@
-> [!WARNING]
-> **⚠️ Under Active Development** — This plugin is currently in active development. Features may be incomplete, APIs may change, and bugs are expected. Use at your own risk. This notice will be removed once the project reaches a stable release.
-
 <p align="center">
   <a href="https://github.com/terwer/AutoJs6-JetBrains">
     <img src="https://img.shields.io/github/stars/terwer/AutoJs6-JetBrains?style=social" alt="Stars" />
@@ -189,7 +186,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GNU General Public License v3.0 — see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Related Projects
 

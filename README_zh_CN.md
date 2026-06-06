@@ -1,6 +1,3 @@
-> [!WARNING]
-> **⚠️ 积极开发中** — 本插件目前处于积极开发阶段。功能可能尚未完善，API 可能发生变更，且可能存在已知或未知的 Bug。请自行承担使用风险。待项目达到稳定版本后，此提示将被移除。
-
 <p align="center">
   <a href="https://github.com/terwer/AutoJs6-JetBrains">
     <img src="https://img.shields.io/github/stars/terwer/AutoJs6-JetBrains?style=social" alt="Stars" />
@@ -189,7 +186,7 @@ org.autojs.autojs6.jetbrains
 
 ## 📄 许可证
 
-本项目基于 MIT 许可证开源 —— 详见 [LICENSE](LICENSE) 文件。
+本项目基于 GNU General Public License v3.0（GPL-3.0）开源 —— 详见 [LICENSE](LICENSE) 文件。
 
 ## 🔗 相关项目
 
