@@ -4,7 +4,7 @@
 在不开始写业务代码的前提下，探索 `AutoJs6-VSCode-Extension` 的功能、入口和迁移边界，并为 `AutoJs6-JetBrains` 制定可执行的 JetBrains 插件开发计划。
 
 ## 当前阶段
-阶段 17
+阶段 18
 
 ## 各阶段
 
@@ -171,4 +171,11 @@
 - [x] 做最小修复：支持 2024+ 且不被 2024.2 上限锁死；避免把未验证 IDE 虚假声明为已验证。
 - [x] 重新构建插件并检查产物描述符，必要时运行测试/校验命令。
 - [x] 记录证据、错误和后续验证建议。
+- **状态：** complete
+### 阶段 18：补全 JetBrains Marketplace 发布文档
+- [x] 查阅 JetBrains Marketplace/IntelliJ Platform 官方发布资料，确认账号注册、插件上传、元数据、签名、验证与审核流程。
+- [x] 审计项目现有发布文档和 Gradle 配置，找出需要替换/补全的位置。
+- [x] 将插件仓库地址替换为 `https://github.com/terwer/AutoJs6-JetBrains`，维护者邮箱为 `youweics@163.com`，官网为 `https://terwer.space`。
+- [x] 明确支持 JetBrains 全系列 IDE 的发布口径：基于 IntelliJ Platform，Marketplace 文案不得绑定单一 IDEA；需保留已验证/待验证矩阵。
+- [x] 更新文档并做关键文本/配置检查。
 - **状态：** complete

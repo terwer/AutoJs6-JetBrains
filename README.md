@@ -2,18 +2,18 @@
 > **⚠️ Under Active Development** — This plugin is currently in active development. Features may be incomplete, APIs may change, and bugs are expected. Use at your own risk. This notice will be removed once the project reaches a stable release.
 
 <p align="center">
-  <a href="https://github.com/niceSilentSam/AutoJs6-JetBrains">
-    <img src="https://img.shields.io/github/stars/niceSilentSam/AutoJs6-JetBrains?style=social" alt="Stars" />
+  <a href="https://github.com/terwer/AutoJs6-JetBrains">
+    <img src="https://img.shields.io/github/stars/terwer/AutoJs6-JetBrains?style=social" alt="Stars" />
   </a>
-  <a href="https://github.com/niceSilentSam/AutoJs6-JetBrains/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/niceSilentSam/AutoJs6-JetBrains" alt="License" />
+  <a href="https://github.com/terwer/AutoJs6-JetBrains/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/terwer/AutoJs6-JetBrains" alt="License" />
   </a>
-  <a href="https://github.com/niceSilentSam/AutoJs6-JetBrains/releases">
-    <img src="https://img.shields.io/github/v/release/niceSilentSam/AutoJs6-JetBrains?include_prereleases" alt="Release" />
+  <a href="https://github.com/terwer/AutoJs6-JetBrains/releases">
+    <img src="https://img.shields.io/github/v/release/terwer/AutoJs6-JetBrains?include_prereleases" alt="Release" />
   </a>
   <img src="https://img.shields.io/badge/Kotlin-2.0.21-blue?logo=kotlin" alt="Kotlin" />
   <img src="https://img.shields.io/badge/IntelliJ_Platform-2024.2+-black?logo=jetbrains" alt="IntelliJ Platform" />
-  <img src="https://img.shields.io/badge/JVM-17-orange?logo=openjdk" alt="JVM 17" />
+  <img src="https://img.shields.io/badge/JVM-21-orange?logo=openjdk" alt="JVM 21" />
 </p>
 
 <p align="center">
@@ -41,7 +41,7 @@
 |---|---|
 | 🔌 **Multi-mode Connection** | IDE listener (port `6347`), direct IP (port `7347`), and ADB — three ways to connect your AutoJs6 devices |
 | ▶️ **Run Script** | Run the currently open script on all connected devices with a single shortcut |
-| ▶️ **AutoJs6 Script Run Configuration** | Save and rerun one local `.js` file through JetBrains Run Configurations, the green Run button, recent runs, and <kbd>Shift</kbd> + <kbd>F10</kbd> |
+| ▶️ **AutoJs6 Script / Project Run Configurations** | Save and rerun one local `.js` file or an AutoJs6 project with `project.json` through JetBrains Run Configurations, the green Run button, recent runs, and <kbd>Shift</kbd> + <kbd>F10</kbd> |
 | 💾 **Save to Device** | Push the current script to all connected devices |
 | ⏹️ **Stop Script** | Stop the current script or all running scripts at once |
 | 📁 **Project Template** | Scaffold a new AutoJs6 project from the built-in AutoJs6 template |
@@ -53,7 +53,7 @@
 ### Prerequisites
 
 - **JetBrains IDE** — IntelliJ IDEA / WebStorm / PyCharm / any JetBrains IDE (build `242+`)
-- **JDK 17+**
+- **JDK 21+**
 - **AutoJs6 App** — version `≥ 6.7.0` (version code `≥ 3591`) installed on your Android device
 - Device and computer on the **same network** (for IP/listener mode) or connected via **USB + ADB**
 
@@ -61,7 +61,7 @@
 
 ```bash
 # Clone and build the plugin
-git clone https://github.com/niceSilentSam/AutoJs6-JetBrains.git
+git clone https://github.com/terwer/AutoJs6-JetBrains.git
 cd AutoJs6-JetBrains
 ./gradlew buildPlugin
 ```
@@ -90,7 +90,7 @@ The built plugin zip will be in `build/distributions/`. Install it via:
 3. Select one local `.js` file
 4. Run it from the green Run button, recent runs, or <kbd>Shift</kbd> + <kbd>F10</kbd>
 
-`AutoJs6 Script` remains a single-file Run Configuration. VSCode-parity project actions (`Run Project` / `Save Project`) are exposed as AutoJs6 actions instead of a fake `AutoJs6 Project` Run Configuration; they resolve `project.json`, build a project diff zip, calculate md5, send bytes first, and then send the JSON `bytes_command`.
+`AutoJs6 Script` and `AutoJs6 Project` are real JetBrains Run Configurations. VSCode-parity project actions (`Run Project` / `Save Project`) are also exposed as AutoJs6 actions; they resolve `project.json`, build a project diff zip, calculate md5, send bytes first, and then send the JSON `bytes_command`.
 
 ## ⌨️ Keyboard Shortcuts
 
@@ -159,12 +159,12 @@ The plugin uses a custom binary framing protocol over TCP:
 | Kotlin | 2.0.21 |
 | IntelliJ Platform | 2024.2 (IC) |
 | IntelliJ Platform Gradle Plugin | 2.2.1 |
-| JVM Toolchain | 17 |
+| JVM Toolchain | 21 |
 | Build System | Gradle with Kotlin DSL |
 
 ## 📋 Compatibility
 
-- ✅ Full JetBrains IDE family support (IntelliJ IDEA, WebStorm, PyCharm, GoLand, etc.)
+- ✅ Designed for the full JetBrains IDE family (IntelliJ IDEA, WebStorm, PyCharm, GoLand, Rider, CLion, DataGrip, etc.; build `242+`) — release claims follow [`docs/release-compatibility-matrix.md`](docs/release-compatibility-matrix.md)
 - ✅ AutoJs6 app version `≥ 6.7.0`
 - ✅ Windows / macOS / Linux (ADB bundled for Windows)
 - ✅ Parity with the [AutoJs6 VSCode extension](https://github.com/niceSilentSam/AutoJs6-VSCode-Extension) workflow
@@ -174,6 +174,8 @@ The plugin uses a custom binary framing protocol over TCP:
 Full AutoJs6 documentation is available at [docs.autojs6.com](https://docs.autojs6.com/).
 
 Access it directly from the IDE via **Tools → AutoJs6 → View Online Document**.
+
+Release and Marketplace publishing steps are documented in [`docs/release-guide.md`](docs/release-guide.md).
 
 ## 🤝 Contributing
 

@@ -196,3 +196,22 @@
   - `git diff --check`：通过；
   - ZIP 内层 JAR `META-INF/plugin.xml`：`<idea-version since-build="242" />`，无 `until-build`。
 - IDEA 2026 (`IU-261.25134.95`) 的“导入被 242.* 拒绝”应由新 ZIP 解决；但 2026 API 级兼容仍需对本机 IDEA 2026 跑 Plugin Verifier/manual smoke，不能把 baseline verifier 结果冒充为完整 2026 验证。
+
+
+## 阶段 18 发现：发布文档与官方资料审计
+- 官方发布流程确认：首次插件发布必须通过 JetBrains Marketplace 手动上传；后续版本可在首次上传后配置 Gradle `publishPlugin` 自动发布。
+- 官方账号流程确认：发布前使用个人 JetBrains Account 登录 Marketplace；没有发布历史时，需要接受 JetBrains Marketplace Developer Agreement 并创建 Vendor profile。
+- 官方上传要求确认：上传新插件需要选择 Vendor profile、提交插件详情、ZIP 文件大小上限 400 MB；开源许可证需要提供源代码链接；tags/channels/hidden release 会影响可见性和分发。
+- 官方签名流程确认：`signPlugin` 在提供 `certificateChain` 与 `privateKey` 后可签名，`publishPlugin` 需要 Marketplace token；凭据应通过环境变量或本地 Gradle properties 传入，不能提交仓库。
+- 官方兼容性依据确认：声明 `com.intellij.modules.platform` 依赖表示依赖所有 IntelliJ Platform 产品共有的平台模块；要支持 JetBrains 全系列，文案应写 JetBrains IDE family，并用 verifier/manual matrix 保留已验证与待验证状态。
+- 本地审计：`docs/release-guide.md` 已有草案但 Marketplace 步骤过粗，缺账号注册、Vendor、插件元数据、token、隐藏渠道、审核后检查等细节。
+- 本地审计：`README.md` / `README_zh_CN.md` 仍含旧仓库 `niceSilentSam/AutoJs6-JetBrains`；需要替换为 `https://github.com/terwer/AutoJs6-JetBrains`。
+- 本地审计：`plugin.xml` 已有维护邮箱 `youweics@163.com`，但 vendor 缺 `url="https://terwer.space"`，发布前应补齐。
+
+
+## 阶段 18 结论：发布文档已沉淀
+- `docs/release-guide.md` 已扩展为完整中文发布指南，覆盖账号注册、Vendor profile、Marketplace 元数据、真实截图/图标、构建、Plugin Verifier、全系列 IDE matrix、手工 smoke、签名、首次手动上传、后续 Gradle `publishPlugin`、私有 ZIP、回滚和发布阻断条件。
+- `docs/release-compatibility-matrix.md` 已改为 JetBrains 全系列目标矩阵，列出 IDEA/WebStorm/PyCharm/PhpStorm/GoLand/RubyMine/CLion/Rider/DataGrip/DataSpell/RustRover/Aqua 等目标产品，以及证据要求。
+- `build.gradle.kts` 已接入本机环境变量方式的 signing/publishing 配置：`INTELLIJ_SIGN_CERTIFICATE_CHAIN`、`INTELLIJ_SIGN_PRIVATE_KEY`、`INTELLIJ_SIGN_PRIVATE_KEY_PASSWORD`、`INTELLIJ_PLATFORM_PUBLISH_TOKEN`；缺少环境变量不影响 `check/buildPlugin`。
+- `plugin.xml` 已补齐 vendor url 与仓库地址；README 中插件仓库地址已替换为 `https://github.com/terwer/AutoJs6-JetBrains`，并将 JDK/JVM 工具链说明修正为 21。
+- 验证结果：`clean check buildPlugin` 通过；`verifyPlugin` 通过（IC-242.20224.300 Compatible，6 个 deprecated API usages）；ZIP 内 `plugin.xml` 确认为 `<idea-version since-build="242" />`、无 `until-build`、vendor url 与仓库地址正确；`git diff --check` 通过。

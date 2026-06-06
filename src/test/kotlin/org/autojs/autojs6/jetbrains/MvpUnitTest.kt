@@ -14,6 +14,7 @@ import org.autojs.autojs6.jetbrains.project.AUTOJS6_SAVE_PROJECT_COMMAND
 import org.autojs.autojs6.jetbrains.remote.AutoJs6HttpBridgeService
 import org.autojs.autojs6.jetbrains.run.AutoJs6ProjectConfigurationSerializer
 import org.autojs.autojs6.jetbrains.run.AutoJs6ScriptConfigurationSerializer
+import org.autojs.autojs6.jetbrains.run.formatAutoJs6RunLogText
 import org.autojs.autojs6.jetbrains.script.AutoJs6ScriptCommand
 import org.autojs.autojs6.jetbrains.statusbar.AutoJs6DeviceStatusText
 import org.jdom.Element
@@ -77,6 +78,13 @@ class MvpUnitTest {
 
         AutoJs6ProjectConfigurationSerializer.writeProjectRoot(element, "")
         assertEquals("", AutoJs6ProjectConfigurationSerializer.readProjectRoot(element))
+    }
+
+    @Test fun runConsoleLogFormatterPrefixesDeviceForEachLine() {
+        assertEquals(
+            "[Pixel 127.0.0.1:7347] I/AutoJs6: first\n[Pixel 127.0.0.1:7347] second\n",
+            formatAutoJs6RunLogText("Pixel", "127.0.0.1:7347", "I/AutoJs6: first\r\nsecond\n")
+        )
     }
 
     @Test fun pluginXmlRegistersRunConfigurationTypeWithPlatformExtensionPoint() {

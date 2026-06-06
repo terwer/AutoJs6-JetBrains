@@ -4,17 +4,12 @@ import com.intellij.execution.DefaultExecutionResult
 import com.intellij.execution.ExecutionResult
 import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.filters.TextConsoleBuilderFactory
-import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.process.ProcessOutputTypes
 import com.intellij.execution.runners.ProgramRunner
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.autojs.autojs6.jetbrains.AutoJs6Notifier
-import org.autojs.autojs6.jetbrains.device.AutoJs6ConnectionService
+import org.autojs.autojs6.jetbrains.device.AutoJs6Device
 import org.autojs.autojs6.jetbrains.script.AutoJs6ScriptCommand
-import java.io.OutputStream
-import java.util.concurrent.atomic.AtomicBoolean
 
 class AutoJs6ScriptRunProfileState(
     private val project: Project,
@@ -24,45 +19,36 @@ class AutoJs6ScriptRunProfileState(
         val console = TextConsoleBuilderFactory.getInstance().createBuilder(project).console
         val handler = AutoJs6ScriptProcessHandler(project, scriptPath)
         console.attachToProcess(handler)
-        handler.startScriptRun()
+        handler.startRun()
         return DefaultExecutionResult(console, handler)
     }
 }
 
 private class AutoJs6ScriptProcessHandler(
-    private val project: Project,
+    project: Project,
     private val scriptPath: String
-) : ProcessHandler() {
-    private val terminated = AtomicBoolean(false)
+) : AutoJs6LogTailingProcessHandler(project, "AutoJs6 Script") {
+    @Volatile
+    private var runningScriptId: String? = null
 
-    fun startScriptRun() {
-        startNotify()
-        ApplicationManager.getApplication().executeOnPooledThread {
-            val exitCode = runCatching {
-                executeScriptRun()
-                0
-            }.getOrElse { t ->
-                val message = t.message ?: t.javaClass.simpleName
-                notifyTextAvailable("ERROR: $message\n", ProcessOutputTypes.STDERR)
-                AutoJs6Notifier.error(project, message)
-                1
-            }
-            terminate(exitCode)
-        }
-    }
-
-    private fun executeScriptRun() {
+    override fun executeRun() {
         val payload = try {
             AutoJs6ScriptCommand.readLocalJsPayload(scriptPath)
         } catch (t: Throwable) {
             throw IllegalStateException(t.message ?: "脚本文件不可读取")
         }
+        runningScriptId = payload.id
 
-        val service = service<AutoJs6ConnectionService>()
-        val sentCount = service.sendCommandToConnectedDevices(
-            AutoJs6ScriptCommand.RUN_COMMAND,
-            payload.toCommandData()
-        )
+        val devices = connectionService.connectedDevices()
+        if (devices.isEmpty()) {
+            throw IllegalStateException("未发现已连接的设备")
+        }
+        startLogTailing(devices)
+
+        val commandData = payload.toCommandData()
+        val sentCount = devices.count { device ->
+            connectionService.sendCommandToDevice(device, AutoJs6ScriptCommand.RUN_COMMAND, commandData)
+        }
         if (sentCount <= 0) {
             throw IllegalStateException("未发现已连接的设备")
         }
@@ -76,23 +62,13 @@ private class AutoJs6ScriptProcessHandler(
         AutoJs6Notifier.info(project, "AutoJs6 Script 已发送到 $sentCount 个设备: ${payload.name}")
     }
 
-    override fun destroyProcessImpl() {
-        terminate(1)
-    }
-
-    override fun detachProcessImpl() {
-        if (terminated.compareAndSet(false, true)) {
-            notifyProcessDetached()
+    override fun onStopRequested(devices: List<AutoJs6Device>) {
+        val scriptId = runningScriptId ?: return
+        val stopData = mapOf("id" to scriptId)
+        var sent = 0
+        devices.forEach { device ->
+            if (connectionService.sendCommandToDevice(device, "stop", stopData)) sent++
         }
-    }
-
-    override fun detachIsDefault(): Boolean = false
-
-    override fun getProcessInput(): OutputStream? = null
-
-    private fun terminate(exitCode: Int) {
-        if (terminated.compareAndSet(false, true)) {
-            notifyProcessTerminated(exitCode)
-        }
+        notifyTextAvailable("AutoJs6 Script: stop sent to $sent device(s), id=$scriptId\n", ProcessOutputTypes.STDOUT)
     }
 }

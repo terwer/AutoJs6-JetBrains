@@ -50,7 +50,8 @@ data class AutoJs6ProjectDiffPayload(
 
 data class AutoJs6ProjectSyncResult(
     val sent: Int,
-    val failures: List<String>
+    val failures: List<String>,
+    val sentDevices: List<AutoJs6Device> = emptyList()
 )
 
 private data class FileStamp(val relativePath: String, val lastModifiedMillis: Long)
@@ -90,6 +91,7 @@ class AutoJs6ProjectSyncService {
     ): AutoJs6ProjectSyncResult {
         var sent = 0
         val failures = mutableListOf<String>()
+        val sentDevices = mutableListOf<AutoJs6Device>()
         devices.forEachIndexed { index, device ->
             beforeDevice?.invoke(index, device)
             try {
@@ -97,11 +99,12 @@ class AutoJs6ProjectSyncService {
                 device.sendBytes(payload.zipBytes)
                 device.sendBytesCommand(payload.md5, payload.commandData(command))
                 sent++
+                sentDevices += device
             } catch (t: Throwable) {
                 failures += "Project sync 到 ${device.endpoint()} 失败: ${t.message}"
             }
         }
-        return AutoJs6ProjectSyncResult(sent, failures)
+        return AutoJs6ProjectSyncResult(sent, failures, sentDevices)
     }
 
     fun buildPayload(root: Path, deviceKey: String): AutoJs6ProjectDiffPayload = buildPayloadWithState(root, stateKey(root, deviceKey))

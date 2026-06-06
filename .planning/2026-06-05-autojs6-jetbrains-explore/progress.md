@@ -401,3 +401,32 @@ equires build 242.* or older，说明产物兼容上限严重错误。
 - **状态：** complete
 - **时间：** 2026-06-06 13:42:02 +08:00 Asia/Shanghai
 - 执行 JetBrains IDE uild_project：成功，problems 为空。
+
+### 阶段 18：补全 JetBrains Marketplace 发布文档
+- **状态：** in_progress
+- **开始时间：** 2026-06-06 13:59:54 +08:00 Asia/Shanghai
+- 用户补充：测试已通过，准备发布到 IDEA/JetBrains 插件中心；需要补全账号注册、上传发布完整步骤，并沉淀到文档。
+- 约束：插件地址使用 https://github.com/terwer/AutoJs6-JetBrains；维护邮箱 youweics@163.com；官网 https://terwer.space；发布口径需支持 JetBrains 全系列，不能只写 IDEA。
+
+
+### 阶段 18 增量：官方发布资料与本地文档审计
+- **时间：** 2026-06-06 14:04:09 Asia/Shanghai
+- 查阅 JetBrains 官方发布、上传、签名、兼容性资料，确认首次发布必须手动、后续可 Gradle 自动发布。
+- 审计 `docs/release-guide.md`、`docs/release-compatibility-matrix.md`、`build.gradle.kts`、`plugin.xml`、README，定位需要补全发布步骤和替换仓库地址的位置。
+- 错误记录：前两次用 PowerShell here-string 写入带 Markdown 反引号的 url= 片段时触发 Unicode escape 解析错误；已改用 Python 追加写入。
+
+
+### 阶段 18 完成：发布文档与发布配置落地
+- **时间：** 2026-06-06 14:16:35 Asia/Shanghai
+- 修改 `docs/release-guide.md`：补全 JetBrains Account 注册、Vendor profile、Marketplace 上传、元数据、签名、Verifier、全系列 IDE smoke matrix、回滚和阻断条件。
+- 修改 `docs/release-compatibility-matrix.md`：明确 JetBrains 全系列 IDE 目标矩阵和每个产品的证据要求。
+- 修改 `src/main/resources/META-INF/plugin.xml`：vendor 邮箱保持 `youweics@163.com`，新增 `url="https://terwer.space"`，vendor 名称为 `terwer`，描述中加入仓库地址。
+- 修改 `build.gradle.kts`：接入仅从环境变量读取的 signing/publishing 配置，避免提交发布凭据。
+- 修改 `README.md` / `README_zh_CN.md`：插件仓库替换为 `https://github.com/terwer/AutoJs6-JetBrains`，补充 release guide 链接，修正 JDK/JVM 21 与真实 Project Run Configuration 描述。
+- 验证：
+  - 第一次 `clean check buildPlugin` 因 120s 工具超时中断；使用更长超时重新执行后通过。
+  - `.\gradlew.bat --no-daemon --console=plain clean check buildPlugin`：通过。
+  - `.\gradlew.bat --no-daemon --console=plain verifyPlugin`：通过，IC-242.20224.300 Compatible，报告 6 个 deprecated API usages。
+  - ZIP 内层 `META-INF/plugin.xml`：`<idea-version since-build="242" />`，无 `until-build`，包含 `url="https://terwer.space"` 和 `https://github.com/terwer/AutoJs6-JetBrains`。
+  - `git diff --check`：通过（仅有 CRLF 提示，不是 whitespace error）。
+- 阶段 18 状态：complete。

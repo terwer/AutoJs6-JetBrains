@@ -2,18 +2,18 @@
 > **⚠️ 积极开发中** — 本插件目前处于积极开发阶段。功能可能尚未完善，API 可能发生变更，且可能存在已知或未知的 Bug。请自行承担使用风险。待项目达到稳定版本后，此提示将被移除。
 
 <p align="center">
-  <a href="https://github.com/niceSilentSam/AutoJs6-JetBrains">
-    <img src="https://img.shields.io/github/stars/niceSilentSam/AutoJs6-JetBrains?style=social" alt="Stars" />
+  <a href="https://github.com/terwer/AutoJs6-JetBrains">
+    <img src="https://img.shields.io/github/stars/terwer/AutoJs6-JetBrains?style=social" alt="Stars" />
   </a>
-  <a href="https://github.com/niceSilentSam/AutoJs6-JetBrains/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/niceSilentSam/AutoJs6-JetBrains" alt="License" />
+  <a href="https://github.com/terwer/AutoJs6-JetBrains/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/terwer/AutoJs6-JetBrains" alt="License" />
   </a>
-  <a href="https://github.com/niceSilentSam/AutoJs6-JetBrains/releases">
-    <img src="https://img.shields.io/github/v/release/niceSilentSam/AutoJs6-JetBrains?include_prereleases" alt="Release" />
+  <a href="https://github.com/terwer/AutoJs6-JetBrains/releases">
+    <img src="https://img.shields.io/github/v/release/terwer/AutoJs6-JetBrains?include_prereleases" alt="Release" />
   </a>
   <img src="https://img.shields.io/badge/Kotlin-2.0.21-blue?logo=kotlin" alt="Kotlin" />
   <img src="https://img.shields.io/badge/IntelliJ_Platform-2024.2+-black?logo=jetbrains" alt="IntelliJ Platform" />
-  <img src="https://img.shields.io/badge/JVM-17-orange?logo=openjdk" alt="JVM 17" />
+  <img src="https://img.shields.io/badge/JVM-21-orange?logo=openjdk" alt="JVM 21" />
 </p>
 
 <p align="center">
@@ -41,7 +41,7 @@
 |---|---|
 | 🔌 **多模式连接** | IDE 监听（端口 `6347`）、IP 直连（端口 `7347`）、ADB 连接 —— 三种方式连接 AutoJs6 设备 |
 | ▶️ **运行脚本** | 快捷键一键将当前编辑的脚本发送到所有已连接设备运行 |
-| ▶️ **AutoJs6 Script 运行配置** | 通过 JetBrains Run Configuration、绿色运行按钮、最近运行记录和 <kbd>Shift</kbd> + <kbd>F10</kbd> 保存并重复运行一个本地 `.js` 文件 |
+| ▶️ **AutoJs6 Script / Project 运行配置** | 通过 JetBrains Run Configuration、绿色运行按钮、最近运行记录和 <kbd>Shift</kbd> + <kbd>F10</kbd> 保存并重复运行本地 `.js` 文件或包含 `project.json` 的 AutoJs6 项目 |
 | 💾 **保存到设备** | 将当前脚本推送到所有已连接设备 |
 | ⏹️ **停止脚本** | 停止当前脚本或一键停止所有运行中的脚本 |
 | 📁 **项目模板** | 基于内置历史模板快速创建 AutoJs6 项目 |
@@ -53,7 +53,7 @@
 ### 环境要求
 
 - **JetBrains IDE** — IntelliJ IDEA / WebStorm / PyCharm 等全系列 JetBrains IDE（build `242+`）
-- **JDK 17+**
+- **JDK 21+**
 - **AutoJs6 应用** — 版本 `≥ 6.7.0`（版本号 `≥ 3591`），已安装在 Android 设备上
 - 设备与电脑处于 **同一网络**（IP / 监听模式）或通过 **USB + ADB** 连接
 
@@ -61,7 +61,7 @@
 
 ```bash
 # 克隆并构建插件
-git clone https://github.com/niceSilentSam/AutoJs6-JetBrains.git
+git clone https://github.com/terwer/AutoJs6-JetBrains.git
 cd AutoJs6-JetBrains
 ./gradlew buildPlugin
 ```
@@ -90,7 +90,7 @@ cd AutoJs6-JetBrains
 3. 选择一个本地 `.js` 文件
 4. 通过绿色运行按钮、最近运行记录或 <kbd>Shift</kbd> + <kbd>F10</kbd> 运行
 
-`AutoJs6 Script` 运行配置仍保持单文件语义。VSCode 对齐的项目操作（`Run Project` / `Save Project`）通过 AutoJs6 actions 提供，而不是伪造 `AutoJs6 Project` Run Configuration；它们会解析 `project.json`，生成项目差量 zip，计算 md5，先发送 bytes，再发送 JSON `bytes_command`。
+`AutoJs6 Script` 和 `AutoJs6 Project` 都是真实 JetBrains Run Configuration。VSCode 对齐的项目操作（`Run Project` / `Save Project`）也通过 AutoJs6 actions 提供；它们会解析 `project.json`，生成项目差量 zip，计算 md5，先发送 bytes，再发送 JSON `bytes_command`。
 
 ## ⌨️ 快捷键
 
@@ -159,12 +159,12 @@ org.autojs.autojs6.jetbrains
 | Kotlin | 2.0.21 |
 | IntelliJ Platform | 2024.2 (IC) |
 | IntelliJ Platform Gradle 插件 | 2.2.1 |
-| JVM 工具链 | 17 |
+| JVM 工具链 | 21 |
 | 构建系统 | Gradle (Kotlin DSL) |
 
 ## 📋 兼容性
 
-- ✅ 全系列 JetBrains IDE（IntelliJ IDEA、WebStorm、PyCharm、GoLand 等）
+- ✅ 面向全系列 JetBrains IDE（IntelliJ IDEA、WebStorm、PyCharm、GoLand、Rider、CLion、DataGrip 等，build `242+`）—— 发布声明以 [`docs/release-compatibility-matrix.md`](docs/release-compatibility-matrix.md) 为准
 - ✅ AutoJs6 应用版本 `≥ 6.7.0`
 - ✅ Windows / macOS / Linux（Windows 内置 ADB）
 - ✅ 与 [AutoJs6 VSCode 扩展](https://github.com/niceSilentSam/AutoJs6-VSCode-Extension) 工作流对等
@@ -174,6 +174,8 @@ org.autojs.autojs6.jetbrains
 完整的 AutoJs6 文档请访问 [docs.autojs6.com](https://docs.autojs6.com/)。
 
 在 IDE 中可通过 **Tools → AutoJs6 → 查看在线文档** 直接访问。
+
+发布到 JetBrains Marketplace / 插件中心的完整步骤见 [`docs/release-guide.md`](docs/release-guide.md)。
 
 ## 🤝 参与贡献
 

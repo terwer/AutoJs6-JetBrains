@@ -1,9 +1,10 @@
 <idea-plugin>
     <id>org.autojs.autojs6.jetbrains</id>
     <name>AutoJs6</name>
-    <vendor email="youweics@163.com">AutoJs6</vendor>
+    <vendor email="youweics@163.com" url="https://terwer.space">terwer</vendor>
     <description><![CDATA[
-        AutoJs6 JetBrains: connect to AutoJs6 devices, run/save/stop current scripts, sync AutoJs6 projects, inspect device logs, and create AutoJs6 projects from the built-in AutoJs6 template.
+        AutoJs6 JetBrains: connect JetBrains IDEs to AutoJs6 devices, run/save/stop current scripts, sync AutoJs6 projects, inspect device logs, and create AutoJs6 projects from the built-in AutoJs6 template.
+        Repository: https://github.com/terwer/AutoJs6-JetBrains
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
