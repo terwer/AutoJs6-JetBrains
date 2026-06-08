@@ -1,6 +1,7 @@
 package org.autojs.autojs6.jetbrains
 
 import org.autojs.autojs6.jetbrains.adb.AdbService
+import org.autojs.autojs6.jetbrains.adb.AdbExecutableResolver
 import org.autojs.autojs6.jetbrains.actions.AutoJs6CommandDispatcher
 import org.autojs.autojs6.jetbrains.connection.AutoJs6NetworkInterfaces
 import org.autojs.autojs6.jetbrains.device.AutoJs6Frame
@@ -53,6 +54,24 @@ class MvpUnitTest {
         assertEquals(1, devices.size)
         assertEquals("abc123", devices[0].id)
         assertEquals("Pixel_8", devices[0].model)
+    }
+
+    @Test fun adbResolverIncludesMacAndroidStudioDefaultSdkPath() {
+        val candidates = AdbExecutableResolver.commonUnixCandidates(
+            envLookup = { null },
+            userHome = "/Users/alice"
+        ).map { it.path }
+
+        assertTrue(candidates.contains("/Users/alice/Library/Android/sdk/platform-tools/adb"))
+    }
+
+    @Test fun adbResolverUsesAndroidSdkEnvironmentRoots() {
+        val candidates = AdbExecutableResolver.commonUnixCandidates(
+            envLookup = { key -> if (key == "ANDROID_HOME") "/opt/android-sdk" else null },
+            userHome = "/Users/alice"
+        ).map { it.path }
+
+        assertEquals("/opt/android-sdk/platform-tools/adb", candidates.first())
     }
 
     @Test fun packageSuffixIsPackageSafe() {
@@ -557,4 +576,3 @@ class MvpUnitTest {
         }
     }
 }
-

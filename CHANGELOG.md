@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.2 - macOS ADB Resolution Fix
+
+- Fixed macOS ADB discovery when JetBrains IDEs are launched outside a shell and do not inherit the user's zsh/PATH environment.
+- Added ADB resolution through IntelliJ environment PATH plus common Android SDK and Homebrew locations, while keeping the Windows bundled `adb.exe` fallback unchanged.
+
 ## v0.1.1 - Project Run Sync Fix
 
 - Fixed JetBrains project Run/Save becoming invalid after the first project execution.

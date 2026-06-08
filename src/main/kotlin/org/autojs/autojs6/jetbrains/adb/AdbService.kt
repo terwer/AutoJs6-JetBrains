@@ -1,9 +1,12 @@
 package org.autojs.autojs6.jetbrains.adb
 
+import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.SystemInfo
+import com.intellij.util.EnvironmentUtil
 import org.autojs.autojs6.jetbrains.AutoJs6Constants
 import org.autojs.autojs6.jetbrains.AutoJs6Notifier
 import org.autojs.autojs6.jetbrains.AutoJs6SettingsService
@@ -30,9 +33,13 @@ class AdbService(private val project: Project) {
 
     fun resolveExecutable(): String? {
         val configured = AutoJs6SettingsService.getInstance().state.adbPath.trim()
-        if (configured.isNotEmpty() && File(configured).canExecute()) return configured
+        AdbExecutableResolver.resolveConfigured(configured, SystemInfo.isWindows)?.let { return it }
+        AdbExecutableResolver.resolveFromPath(SystemInfo.isWindows)?.let { return it }
         if (canRun("adb")) return "adb"
-        if (System.getProperty("os.name").lowercase().contains("win")) {
+        if (!SystemInfo.isWindows) {
+            AdbExecutableResolver.resolveFromCommonUnixLocations()?.let { return it }
+        }
+        if (SystemInfo.isWindows) {
             val candidates = listOf(
                 File(PathManager.getPluginsPath(), "AutoJs6/tools/adb.exe"),
                 File(PathManager.getPluginsPath(), "AutoJs6/tools/platform-tools/adb.exe"),
@@ -40,7 +47,7 @@ class AdbService(private val project: Project) {
                 File("src/main/resources/tools/adb.exe"),
                 File("src/main/resources/tools/platform-tools/adb.exe")
             )
-            return candidates.firstOrNull { it.canExecute() || it.exists() }?.absolutePath
+            return candidates.firstOrNull { AdbExecutableResolver.isUsableExecutable(it, windows = true) }?.absolutePath
         }
         return null
     }
@@ -135,3 +142,63 @@ class AdbService(private val project: Project) {
 }
 
 data class ProcResult(val exitCode: Int, val stdout: String, val stderr: String)
+
+internal object AdbExecutableResolver {
+    private val sdkEnvironmentKeys = listOf("ANDROID_HOME", "ANDROID_SDK_ROOT")
+    private val homeRelativeSdkRoots = listOf(
+        "Library/Android/sdk",
+        "Android/Sdk"
+    )
+    private val unixExecutableLocations = listOf(
+        "/opt/homebrew/bin/adb",
+        "/usr/local/bin/adb",
+        "/opt/local/bin/adb",
+        "/usr/bin/adb",
+        "/snap/bin/adb"
+    )
+
+    fun resolveConfigured(configured: String, windows: Boolean): String? =
+        configuredPathCandidates(configured, windows)
+            .firstOrNull { isUsableExecutable(it, windows) }
+            ?.absolutePath
+
+    fun resolveFromPath(windows: Boolean): String? {
+        val executableName = if (windows) "adb.exe" else "adb"
+        val pathValues = listOf(
+            EnvironmentUtil.getValue("PATH"),
+            PathEnvironmentVariableUtil.getPathVariableValue(),
+            System.getenv("PATH")
+        ).mapNotNull { it?.takeIf(String::isNotBlank) }.distinct()
+
+        return pathValues.firstNotNullOfOrNull { pathValue ->
+            PathEnvironmentVariableUtil.findInPath(executableName, pathValue) { file ->
+                isUsableExecutable(file, windows)
+            }?.absolutePath
+        }
+    }
+
+    fun resolveFromCommonUnixLocations(): String? =
+        commonUnixCandidates(
+            envLookup = { name -> EnvironmentUtil.getValue(name) ?: System.getenv(name) },
+            userHome = System.getProperty("user.home")
+        ).firstOrNull { isUsableExecutable(it, windows = false) }?.absolutePath
+
+    fun configuredPathCandidates(configured: String, windows: Boolean): List<File> {
+        if (configured.isBlank()) return emptyList()
+        val file = File(configured.trim())
+        if (!file.isDirectory) return listOf(file)
+        return listOf(File(file, if (windows) "adb.exe" else "adb"))
+    }
+
+    fun commonUnixCandidates(envLookup: (String) -> String?, userHome: String): List<File> {
+        val sdkRoots = buildList {
+            sdkEnvironmentKeys.mapNotNullTo(this) { key -> envLookup(key)?.trim()?.takeIf { it.isNotBlank() } }
+            homeRelativeSdkRoots.mapTo(this) { relative -> File(userHome, relative).path }
+        }
+        return (sdkRoots.map { root -> File(root, "platform-tools/adb") } + unixExecutableLocations.map(::File))
+            .distinctBy { it.absolutePath }
+    }
+
+    fun isUsableExecutable(file: File, windows: Boolean): Boolean =
+        file.isFile && (file.canExecute() || windows)
+}
