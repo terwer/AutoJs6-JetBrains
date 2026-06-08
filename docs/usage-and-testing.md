@@ -19,7 +19,7 @@
 插件 ZIP 输出：
 
 ```text
-build/distributions/AutoJs6-JetBrains-0.1.1.zip
+build/distributions/AutoJs6-JetBrains-0.1.2.zip
 ```
 
 安装 ZIP：
@@ -29,7 +29,7 @@ Settings / Preferences
 → Plugins
 → 齿轮图标
 → Install Plugin from Disk
-→ 选择 build/distributions/AutoJs6-JetBrains-0.1.1.zip
+→ 选择 build/distributions/AutoJs6-JetBrains-0.1.2.zip
 → Restart IDE
 ```
 
@@ -183,7 +183,7 @@ assert typ == 1
 assert msg["type"] == "hello"
 assert int(msg["data"]["app_version_code"]) >= 3591
 
-resp = {"id": 1, "type": "hello", "data": {"extensionVersion": "0.1.1"}}
+resp = {"id": 1, "type": "hello", "data": {"extensionVersion": "0.1.2"}}
 out = json.dumps(resp, separators=(",", ":")).encode()
 s.sendall(struct.pack(">ii", len(out), 1) + out)
 s.close()
@@ -434,5 +434,5 @@ adb devices -l
 或安装 ZIP：
 
 ```text
-build/distributions/AutoJs6-JetBrains-0.1.1.zip
+build/distributions/AutoJs6-JetBrains-0.1.2.zip
 ```

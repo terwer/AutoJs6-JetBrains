@@ -115,6 +115,25 @@ case "$( uname )" in                #(
 esac
 
 
+# AutoJs6: Gradle 9.3 requires JVM 17+ to run. The project itself uses a
+# Java 21 toolchain, so on macOS prefer JDK 21 automatically even if the
+# user's shell still exports an older JAVA_HOME (for example JDK 8).
+if "$darwin" && [ "${AUTOJS6_GRADLE_AUTO_JAVA_HOME:-true}" != "false" ] && [ -x /usr/libexec/java_home ] ; then
+    auto_java_home=
+    for auto_java_version in 21 17
+    do
+        auto_java_home_candidate=$(/usr/libexec/java_home -v "$auto_java_version" 2>/dev/null) || auto_java_home_candidate=
+        if [ -n "$auto_java_home_candidate" ] && [ -x "$auto_java_home_candidate/bin/java" ] ; then
+            auto_java_home=$auto_java_home_candidate
+            break
+        fi
+    done
+    if [ -n "$auto_java_home" ] ; then
+        JAVA_HOME=$auto_java_home
+    fi
+fi
+
+
 
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
